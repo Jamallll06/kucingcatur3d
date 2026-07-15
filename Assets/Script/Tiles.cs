@@ -8,25 +8,27 @@ public class Tile : MonoBehaviour
 
     private MeshRenderer meshRenderer;
 
-    [Header("Materials")]
-
-    public Material whiteMaterial;
-
-    public Material blackMaterial;
-
-    public Material moveMaterial;
-
-    public Material attackMaterial;
-
-    public Material selectedMaterial;
+    private Material defaultMaterial;
 
     void Awake()
     {
         meshRenderer = GetComponent<MeshRenderer>();
+
+        defaultMaterial = meshRenderer.material;
     }
 
     public void SetMaterial(Material mat)
     {
         meshRenderer.material = mat;
+    }
+
+    public void ResetTile()
+    {
+        meshRenderer.material = defaultMaterial;
+    }
+
+    private void OnMouseDown()
+    {
+        GridManager.Instance.SelectTile(this);
     }
 }

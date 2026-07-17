@@ -1,27 +1,32 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GridManager : MonoBehaviour
 {
     public static GridManager Instance { get; private set; }
 
-    [Header("Board Settings")]
+    [Header("Board")]
     [SerializeField] private int width = 8;
     [SerializeField] private int height = 8;
     [SerializeField] private float tileSize = 1f;
     [SerializeField] private Transform boardParent;
 
-    [Header("Prefabs & Materials")]
+    [Header("Prefab")]
     [SerializeField] private Tile tilePrefab;
+
+    [Header("Materials")]
     [SerializeField] private Material whiteTileMaterial;
     [SerializeField] private Material blackTileMaterial;
     [SerializeField] private Material selectedTileMaterial;
     [SerializeField] private Material moveTileMaterial;
+    [SerializeField] private Material attackTileMaterial;
 
     public Tile[,] Tiles { get; private set; }
+    public int Width => width;
+    public int Height => height;
 
     private Tile selectedTile;
-
-    private KingPiece selectedKing;
+    private ChessPiece selectedPiece;
 
     private void Awake()
     {
@@ -34,8 +39,6 @@ public class GridManager : MonoBehaviour
         Instance = this;
         GenerateGrid();
     }
-
-    
 
     private void GenerateGrid()
     {
@@ -59,58 +62,61 @@ public class GridManager : MonoBehaviour
                 );
 
                 bool isWhite = (x + y) % 2 == 0;
+
                 Material baseMaterial = isWhite
                     ? whiteTileMaterial
                     : blackTileMaterial;
 
                 tile.Initialize(new Vector2Int(x, y), baseMaterial);
+
                 Tiles[x, y] = tile;
             }
         }
     }
 
+    public Tile GetTile(Vector2Int position)
+    {
+        bool outsideBoard =
+            position.x < 0 || position.x >= width ||
+            position.y < 0 || position.y >= height;
+
+        return outsideBoard ? null : Tiles[position.x, position.y];
+    }
+
+    public void SelectPiece(ChessPiece piece)
+    {
+        if (TurnManager.Instance == null ||
+            !TurnManager.Instance.IsPlayerTurn)
+            return;
+
+        selectedPiece = piece;
+        HighlightMoves(piece.GetLegalMoves());
+    }
+
     public void SelectTile(Tile tile)
     {
-        if (selectedKing != null)
-        {
-            bool moved = selectedKing.TryMoveTo(tile.GridPosition);
+        if (TurnManager.Instance == null ||
+            !TurnManager.Instance.IsPlayerTurn)
+            return;
 
-            if (moved)
+        if (selectedPiece != null)
+        {
+            if (selectedPiece.TryMoveTo(tile.GridPosition))
             {
-                selectedKing = null;
+                selectedPiece = null;
                 ClearHighlights();
-                return;
             }
+
+            return;
         }
 
         ClearHighlights();
 
         selectedTile = tile;
         selectedTile.SetMaterial(selectedTileMaterial);
-
-        Debug.Log($"Tile dipilih: {tile.GridPosition}");
     }
 
-    public Tile GetTile(Vector2Int position)
-    {
-        bool isOutsideBoard =
-            position.x < 0 || position.x >= width ||
-            position.y < 0 || position.y >= height;
-
-        return isOutsideBoard ? null : Tiles[position.x, position.y];
-    }
-
-    public void ClearHighlights()
-    {
-        foreach (Tile tile in Tiles)
-        {
-            tile.ResetTile();
-        }
-
-        selectedTile = null;
-    }
-
-    public void HighlightMoves(System.Collections.Generic.List<Vector2Int> moves)
+    public void HighlightMoves(List<Vector2Int> moves)
     {
         ClearHighlights();
 
@@ -123,12 +129,24 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    public void SelectKing(KingPiece king)
+    public void ShowAttackTelegraph(List<Vector2Int> targetPositions)
     {
-        selectedKing = king;
+        ClearHighlights();
 
-        HighlightMoves(king.GetLegalMoves());
+        foreach (Vector2Int position in targetPositions)
+        {
+            Tile tile = GetTile(position);
 
-        Debug.Log($"King dipilih: {king.CurrentPosition}");
+            if (tile != null)
+                tile.SetMaterial(attackTileMaterial);
+        }
+    }
+
+    public void ClearHighlights()
+    {
+        foreach (Tile tile in Tiles)
+            tile.ResetTile();
+
+        selectedTile = null;
     }
 }

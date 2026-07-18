@@ -4,14 +4,25 @@ using UnityEngine;
 
 public abstract class ChessPiece : MonoBehaviour
 {
+    [Header("Attack")]
+    [SerializeField] private int attackDamage = 1;
+    [SerializeField] private float attackRange = 1.3f;
+
     [SerializeField] protected Vector2Int startingPosition;
     [SerializeField] private float heightAboveTile = 0.65f;
     [SerializeField] private float moveDuration = 0.2f;
     [SerializeField] private int health = 3;
 
+    public bool IsMoving => isMoving;
+
     public Vector2Int CurrentPosition { get; private set; }
 
     private bool isMoving;
+
+    private int maxHealth;
+
+    public int CurrentHealth => health;
+    public int MaxHealth => maxHealth;
 
     protected virtual void Start()
     {
@@ -19,6 +30,11 @@ public abstract class ChessPiece : MonoBehaviour
         transform.position = GetWorldPosition(CurrentPosition);
 
         GridManager.Instance.GetTile(CurrentPosition).IsOccupied = true;
+    }
+
+    protected virtual void Awake()
+    {
+        maxHealth = health;
     }
 
     protected virtual void OnMouseDown()
@@ -47,7 +63,7 @@ public abstract class ChessPiece : MonoBehaviour
         return true;
     }
 
-    public void TakeDamage(int damage)
+    public virtual void TakeDamage(int damage)
     {
         health -= damage;
 
@@ -61,7 +77,11 @@ public abstract class ChessPiece : MonoBehaviour
         GridManager.Instance.GetTile(CurrentPosition).IsOccupied = false;
 
         Debug.Log($"{gameObject.name} kalah!");
+
         gameObject.SetActive(false);
+
+        if (GameManager.Instance != null)
+            GameManager.Instance.CheckGameOver();
     }
 
     private IEnumerator MoveRoutine(
@@ -98,6 +118,8 @@ public abstract class ChessPiece : MonoBehaviour
 
         GridManager.Instance.GetTile(CurrentPosition).IsOccupied = true;
 
+        TryAttackBoss();
+
         isMoving = false;
 
         if (endPlayerTurn && TurnManager.Instance != null)
@@ -116,5 +138,40 @@ public abstract class ChessPiece : MonoBehaviour
         Tile tile = GridManager.Instance.GetTile(position);
 
         return tile.transform.position + Vector3.up * heightAboveTile;
+    }
+
+    private void TryAttackBoss()
+    {
+        BossHealth boss = FindFirstObjectByType<BossHealth>();
+
+        if (boss == null || boss.IsDefeated)
+            return;
+
+        float distance = Vector3.Distance(
+            transform.position,
+            boss.transform.position
+        );
+
+        if (distance > attackRange)
+            return;
+
+        boss.TakeDamage(attackDamage);
+
+        Debug.Log(
+            $"{gameObject.name} menyerang Boss " +
+            $"sebesar {attackDamage} damage."
+        );
+    }
+
+    public void Heal(int amount)
+    {
+        int healthBefore = health;
+
+        health = Mathf.Min(health + amount, maxHealth);
+
+        Debug.Log(
+            $"{gameObject.name} pulih dari " +
+            $"{healthBefore} menjadi {health} HP."
+        );
     }
 }

@@ -55,11 +55,16 @@ public class TurnManager : MonoBehaviour
         CurrentTurn = TurnState.BossTurn;
         Debug.Log("Giliran Boss");
 
-        if (bossAI != null)
+        if (bossAI != null && bossAI.gameObject.activeInHierarchy)
             yield return bossAI.ExecuteTurn();
         else
-            yield return new WaitForSeconds(bossTurnDuration);
+            yield return null;
 
         BeginPlayerTurn();
+    }
+
+    public void EndGame()
+    {
+        CurrentTurn = TurnState.GameOver;
     }
 }

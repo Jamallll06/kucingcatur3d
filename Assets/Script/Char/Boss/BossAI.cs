@@ -6,7 +6,9 @@ public enum BossAttackPattern
 {
     SingleTarget,
     Cross,
-    Square
+    Square,
+    LaserRow,
+    LaserColumn
 }
 
 public class BossAI : MonoBehaviour
@@ -18,6 +20,18 @@ public class BossAI : MonoBehaviour
     [Header("Attack")]
     [SerializeField] private float telegraphDuration = 1f;
     [SerializeField] private int damage = 1;
+
+    [Header("Phase")]
+    [Range(0f, 1f)]
+    [SerializeField] private float phase2Threshold = 0.70f;
+
+    [Range(0f, 1f)]
+    [SerializeField] private float phase3Threshold = 0.35f;
+
+    [SerializeField] private float attackDelayBetweenPatterns = 0.2f;
+
+    private BossHealth bossHealth;
+    private int previousPhase;
 
     [Header("Targeting")]
     [Range(0f, 1f)]
@@ -32,6 +46,12 @@ public class BossAI : MonoBehaviour
     private bool isParryWindowOpen;
     private bool parrySucceeded;
 
+    private void Start()
+    {
+        bossHealth = GetComponent<BossHealth>();
+        previousPhase = GetCurrentPhase();
+    }
+
     private void Update()
     {
         if (isParryWindowOpen && Input.GetKeyDown(parryKey))
@@ -45,6 +65,27 @@ public class BossAI : MonoBehaviour
 
     public IEnumerator ExecuteTurn()
     {
+        int currentPhase = GetCurrentPhase();
+
+        if (currentPhase != previousPhase)
+        {
+            previousPhase = currentPhase;
+            Debug.Log($"Boss masuk Phase {currentPhase}!");
+        }
+
+        int attackCount = currentPhase == 3 ? 2 : 1;
+
+        for (int i = 0; i < attackCount; i++)
+        {
+            yield return ExecuteSingleAttack();
+
+            if (i < attackCount - 1)
+                yield return new WaitForSeconds(attackDelayBetweenPatterns);
+        }
+    }
+
+    private IEnumerator ExecuteSingleAttack()
+    {
         ChessPiece targetPiece = FindNearestPiece();
 
         if (targetPiece == null)
@@ -54,7 +95,7 @@ public class BossAI : MonoBehaviour
             ChooseTargetPosition(targetPiece.CurrentPosition);
 
         BossAttackPattern pattern =
-            (BossAttackPattern)Random.Range(0, 3);
+            GetPatternForCurrentPhase();
 
         List<Vector2Int> attackTiles =
             GetAttackTiles(targetCenter, pattern);
@@ -83,6 +124,9 @@ public class BossAI : MonoBehaviour
         if (parrySucceeded)
         {
             MovePieceToSafeTile(targetPiece, attackTiles);
+
+            if (EnergyManager.Instance != null)
+                EnergyManager.Instance.AddEnergy(1);
         }
         else
         {
@@ -214,7 +258,10 @@ public class BossAI : MonoBehaviour
 
     private Vector2Int ChooseTargetPosition(Vector2Int piecePosition)
     {
-        if (Random.value <= targetAccuracy)
+        float phaseAccuracy = targetAccuracy +
+            (GetCurrentPhase() - 1) * 0.1f;
+
+        if (Random.value <= Mathf.Clamp01(phaseAccuracy))
             return piecePosition;
 
         for (int attempt = 0; attempt < 10; attempt++)
@@ -268,6 +315,26 @@ public class BossAI : MonoBehaviour
                     }
                 }
                 break;
+
+            case BossAttackPattern.LaserRow:
+                for (int x = 0; x < GridManager.Instance.Width; x++)
+                {
+                    AddIfValid(
+                        tiles,
+                        new Vector2Int(x, center.y)
+                    );
+                }
+                break;
+
+            case BossAttackPattern.LaserColumn:
+                for (int y = 0; y < GridManager.Instance.Height; y++)
+                {
+                    AddIfValid(
+                        tiles,
+                        new Vector2Int(center.x, y)
+                    );
+                }
+                break;
         }
 
         return tiles;
@@ -293,5 +360,45 @@ public class BossAI : MonoBehaviour
             if (attackTiles.Contains(piece.CurrentPosition))
                 piece.TakeDamage(damage);
         }
+    }
+
+    private int GetCurrentPhase()
+    {
+        if (bossHealth == null || bossHealth.MaxHealth <= 0)
+            return 1;
+
+        float healthPercent =
+            (float)bossHealth.CurrentHealth / bossHealth.MaxHealth;
+
+        if (healthPercent <= phase3Threshold)
+            return 3;
+
+        if (healthPercent <= phase2Threshold)
+            return 2;
+
+        return 1;
+    }
+
+    private BossAttackPattern GetPatternForCurrentPhase()
+    {
+        int phase = GetCurrentPhase();
+
+        if (phase == 1)
+        {
+            return Random.value < 0.5f
+                ? BossAttackPattern.SingleTarget
+                : BossAttackPattern.Cross;
+        }
+
+        if (phase == 2)
+        {
+            int randomPattern = Random.Range(1, 4);
+
+            return (BossAttackPattern)randomPattern;
+        }
+
+        int phase3Pattern = Random.Range(1, 5);
+
+        return (BossAttackPattern)phase3Pattern;
     }
 }

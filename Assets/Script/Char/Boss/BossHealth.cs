@@ -20,6 +20,12 @@ public class BossHealth : MonoBehaviour
 
         CurrentHealth -= damage;
 
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayBossHit();
+
+        if (CameraShake.Instance != null)
+            CameraShake.Instance.Shake(0.2f, 0.08f);
+
         Debug.Log(
             $"Boss menerima {damage} damage. " +
             $"HP Boss: {CurrentHealth}/{maxHealth}"

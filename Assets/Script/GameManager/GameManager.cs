@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -61,5 +62,21 @@ public class GameManager : MonoBehaviour
         TurnManager.Instance.EndGame();
 
         Debug.Log("GAME OVER!");
+    }
+
+    public void RestartGame()
+    {
+        Time.timeScale = 1f;
+
+        SceneManager.LoadScene(
+            SceneManager.GetActiveScene().buildIndex
+        );
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
+
+        Debug.Log("Keluar dari game.");
     }
 }

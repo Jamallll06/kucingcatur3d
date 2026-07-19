@@ -172,6 +172,9 @@ public class TransformingPiece : ChessPiece
 
         ApplyFormVisual();
 
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayTransform();
+
         Debug.Log($"Hero Cat berubah menjadi {currentForm}.");
     }
 

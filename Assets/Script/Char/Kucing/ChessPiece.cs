@@ -50,6 +50,9 @@ public abstract class ChessPiece : MonoBehaviour
         if (isMoving || !GetLegalMoves().Contains(targetPosition))
             return false;
 
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayMove();
+
         StartCoroutine(MoveRoutine(targetPosition, true));
         return true;
     }
@@ -66,6 +69,12 @@ public abstract class ChessPiece : MonoBehaviour
     public virtual void TakeDamage(int damage)
     {
         health -= damage;
+
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayHit();
+
+        if (CameraShake.Instance != null)
+            CameraShake.Instance.Shake(0.15f, 0.12f);
 
         Debug.Log(
             $"{gameObject.name} menerima {damage} damage. HP: {health}"

@@ -127,6 +127,9 @@ public class BossAI : MonoBehaviour
 
             if (EnergyManager.Instance != null)
                 EnergyManager.Instance.AddEnergy(1);
+
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PlayParry();
         }
         else
         {

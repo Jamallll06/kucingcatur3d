@@ -1,82 +1,94 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+
 public class GameManager : MonoBehaviour
 {
-    public static GameManager Instance { get; private set; }
 
-    [SerializeField] private GameObject victoryPanel;
-    [SerializeField] private GameObject gameOverPanel;
+    public static GameManager Instance;
 
-    public bool IsGameFinished { get; private set; }
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
         Instance = this;
-
-        if (victoryPanel != null)
-            victoryPanel.SetActive(false);
-
-        if (gameOverPanel != null)
-            gameOverPanel.SetActive(false);
     }
+
+
+
+    public void GameOver()
+    {
+
+        Debug.Log(
+            "GAME OVER"
+        );
+
+
+        TurnManager.Instance.EndGame();
+
+    }
+
+
 
     public void Victory()
     {
-        if (IsGameFinished)
-            return;
 
-        IsGameFinished = true;
-
-        if (victoryPanel != null)
-            victoryPanel.SetActive(true);
-
-        TurnManager.Instance.EndGame();
-
-        Debug.Log("VICTORY!");
-    }
-
-    public void CheckGameOver()
-    {
-        if (IsGameFinished)
-            return;
-
-        ChessPiece[] livingPieces = FindObjectsByType<ChessPiece>(
-            FindObjectsSortMode.None
+        Debug.Log(
+            "VICTORY"
         );
 
-        if (livingPieces.Length > 0)
-            return;
 
-        IsGameFinished = true;
+        TurnManager.Instance.Victory();
 
-        if (gameOverPanel != null)
-            gameOverPanel.SetActive(true);
-
-        TurnManager.Instance.EndGame();
-
-        Debug.Log("GAME OVER!");
     }
+
+
 
     public void RestartGame()
     {
-        Time.timeScale = 1f;
+
+        Time.timeScale = 1;
+
 
         SceneManager.LoadScene(
-            SceneManager.GetActiveScene().buildIndex
-        );
+        SceneManager.GetActiveScene().buildIndex);
+
     }
+
+
+
+    public void CheckGameOver()
+    {
+
+        TransformingPiece hero =
+        FindFirstObjectByType<TransformingPiece>();
+
+
+        if (hero.CurrentHealth <= 0)
+        {
+            GameOver();
+        }
+
+    }
+
+    // =========================
+    // QUIT GAME
+    // =========================
 
     public void QuitGame()
     {
-        Application.Quit();
+        Debug.Log("Quit Game");
 
-        Debug.Log("Keluar dari game.");
+
+#if UNITY_EDITOR
+
+        UnityEditor.EditorApplication.isPlaying = false;
+
+#else
+
+    Application.Quit();
+
+#endif
+
     }
+
 }

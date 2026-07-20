@@ -83,6 +83,35 @@ public class GridManager : MonoBehaviour
         return outsideBoard ? null : Tiles[position.x, position.y];
     }
 
+    public Vector2Int WorldToGrid(Vector3 worldPosition)
+    {
+        int x = Mathf.RoundToInt(
+            worldPosition.x / tileSize +
+            (width - 1) * 0.5f
+        );
+
+        int y = Mathf.RoundToInt(
+            worldPosition.z / tileSize +
+            (height - 1) * 0.5f
+        );
+
+
+        return new Vector2Int(x, y);
+    }
+
+    public Vector3 GridToWorld(Vector2Int gridPosition)
+    {
+        return new Vector3(
+            gridPosition.x * tileSize -
+            (width - 1) * tileSize * 0.5f,
+
+            0f,
+
+            gridPosition.y * tileSize -
+            (height - 1) * tileSize * 0.5f
+        );
+    }
+
     public void SelectPiece(ChessPiece piece)
     {
         if (TurnManager.Instance == null ||

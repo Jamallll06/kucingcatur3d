@@ -1,70 +1,162 @@
 using System.Collections;
 using UnityEngine;
 
-public enum TurnState
-{
-    PlayerTurn,
-    BossTurn,
-    GameOver
-}
 
 public class TurnManager : MonoBehaviour
 {
-    public static TurnManager Instance { get; private set; }
+    public static TurnManager Instance;
 
-    [SerializeField] private BossAI bossAI;
-    [SerializeField] private float bossTurnDuration = 1.5f;
 
-    public TurnState CurrentTurn { get; private set; }
+    public bool IsPlayerTurn { get; private set; }
 
-    public bool IsPlayerTurn =>
-        CurrentTurn == TurnState.PlayerTurn;
+
+    [SerializeField]
+    private BossBase currentBoss;
+
+
+    private bool isChangingTurn;
+
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
         Instance = this;
     }
 
+
+
     private void Start()
     {
-        BeginPlayerTurn();
+        IsPlayerTurn = true;
+
+        Debug.Log(
+        "Guardian Boss Aktif"
+        );
     }
 
-    public void BeginPlayerTurn()
-    {
-        CurrentTurn = TurnState.PlayerTurn;
-        Debug.Log("Giliran Player");
-    }
+
 
     public void EndPlayerTurn()
     {
-        if (!IsPlayerTurn)
-            return;
+        StartBossTurn();
+    }
 
+
+
+    public void StartBossTurn()
+    {
         StartCoroutine(BossTurnRoutine());
     }
 
+
+
     private IEnumerator BossTurnRoutine()
     {
-        CurrentTurn = TurnState.BossTurn;
-        Debug.Log("Giliran Boss");
 
-        if (bossAI != null && bossAI.gameObject.activeInHierarchy)
-            yield return bossAI.ExecuteTurn();
+        Debug.Log("MASUK BOSS TURN ROUTINE");
+
+
+        IsPlayerTurn = false;
+
+
+        Debug.Log("BOSS TURN");
+
+
+
+        yield return new WaitForSeconds(1);
+
+
+
+        if (currentBoss != null)
+        {
+
+            Debug.Log(
+                "Boss ditemukan: "
+                + currentBoss.name
+                +
+                " Type: "
+                +
+                currentBoss.GetType()
+             );
+
+
+            GuardianBoss boss =
+            currentBoss as GuardianBoss;
+
+
+
+            if (boss != null)
+            {
+
+                Debug.Log(
+                "Memanggil Guardian Boss"
+                );
+
+
+                yield return StartCoroutine(
+                    boss.BossTurn()
+                );
+
+            }
+
+            else
+            {
+                Debug.LogError(
+                "Current Boss bukan GuardianBoss"
+                );
+            }
+
+        }
+
         else
-            yield return null;
+        {
+            Debug.LogError(
+            "Current Boss kosong!"
+            );
+        }
 
-        BeginPlayerTurn();
+
+
+        IsPlayerTurn = true;
+
     }
+
+
+
+    public void SetBoss(BossBase boss)
+    {
+        currentBoss = boss;
+    }
+
+
 
     public void EndGame()
     {
-        CurrentTurn = TurnState.GameOver;
+
+        StopAllCoroutines();
+
+        IsPlayerTurn = false;
+
+
+        Debug.Log(
+            "GAME END"
+        );
+
     }
+
+
+
+    public void Victory()
+    {
+
+        StopAllCoroutines();
+
+        IsPlayerTurn = false;
+
+
+        Debug.Log(
+            "PLAYER WIN"
+        );
+
+    }
+
 }

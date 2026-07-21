@@ -8,45 +8,81 @@ public class BossHealth : MonoBehaviour
     public int CurrentHealth { get; private set; }
     public bool IsDefeated { get; private set; }
 
+
     private void Awake()
     {
         CurrentHealth = maxHealth;
     }
+
+
 
     public void TakeDamage(int damage)
     {
         if (IsDefeated)
             return;
 
+
         CurrentHealth -= damage;
+
 
         if (AudioManager.Instance != null)
             AudioManager.Instance.PlayBossHit();
 
+
         if (CameraShake.Instance != null)
             CameraShake.Instance.Shake(0.2f, 0.08f);
+
+
 
         Debug.Log(
             $"Boss menerima {damage} damage. " +
             $"HP Boss: {CurrentHealth}/{maxHealth}"
         );
 
+
+
         if (CurrentHealth <= 0)
             Defeat();
+
     }
+
+
+
 
     private void Defeat()
     {
+
         IsDefeated = true;
+
+
 
         BossAI bossAI = GetComponent<BossAI>();
 
         if (bossAI != null)
             bossAI.enabled = false;
 
-        gameObject.SetActive(false);
 
+
+        // Beritahu sistem level
+        BossLevelComplete levelComplete =
+     GetComponent<BossLevelComplete>();
+
+
+        if (levelComplete != null)
+        {
+            levelComplete.BossDefeated();
+        }
+
+
+
+        // Sistem victory lama tetap jalan
         if (GameManager.Instance != null)
             GameManager.Instance.Victory();
+
+
+
+        gameObject.SetActive(false);
+
     }
+
 }

@@ -32,12 +32,19 @@ public class GameManager : MonoBehaviour
         if (IsGameFinished)
             return;
 
+
         IsGameFinished = true;
+
 
         if (victoryPanel != null)
             victoryPanel.SetActive(true);
 
-        TurnManager.Instance.EndGame();
+
+
+        if (TurnManager.Instance != null)
+            TurnManager.Instance.EndGame();
+
+
 
         Debug.Log("VICTORY!");
     }
@@ -47,19 +54,29 @@ public class GameManager : MonoBehaviour
         if (IsGameFinished)
             return;
 
+
         ChessPiece[] livingPieces = FindObjectsByType<ChessPiece>(
             FindObjectsSortMode.None
         );
 
+
         if (livingPieces.Length > 0)
             return;
 
+
+
         IsGameFinished = true;
+
 
         if (gameOverPanel != null)
             gameOverPanel.SetActive(true);
 
-        TurnManager.Instance.EndGame();
+
+
+        if (TurnManager.Instance != null)
+            TurnManager.Instance.EndGame();
+
+
 
         Debug.Log("GAME OVER!");
     }

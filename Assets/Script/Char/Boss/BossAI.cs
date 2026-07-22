@@ -404,4 +404,15 @@ public class BossAI : MonoBehaviour
 
         return (BossAttackPattern)phase3Pattern;
     }
+
+    public void SetAccuracy(float accuracy)
+    {
+        targetAccuracy = accuracy;
+    }
+
+    public void SetTelegraph(float duration)
+    {
+        telegraphDuration = duration;
+    }
+
 }

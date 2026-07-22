@@ -4,22 +4,16 @@ using UnityEngine;
 public class LevelInitializer : MonoBehaviour
 {
 
-    public static LevelInitializer Instance;
+    [SerializeField]
+    private LevelData levelData;
+
 
 
     private void Awake()
     {
-        Instance = this;
-    }
-
-
-
-    private void Start()
-    {
-
         ApplyLevelData();
-
     }
+
 
 
 
@@ -27,26 +21,10 @@ public class LevelInitializer : MonoBehaviour
     private void ApplyLevelData()
     {
 
-        if (LevelManager.Instance == null)
+        if(levelData == null)
         {
             Debug.LogError(
-                "LevelManager tidak ditemukan"
-            );
-
-            return;
-        }
-
-
-
-        LevelData data =
-            LevelManager.Instance.CurrentLevelData;
-
-
-
-        if (data == null)
-        {
-            Debug.LogError(
-                "LevelData kosong"
+                "LevelData belum diisi!"
             );
 
             return;
@@ -56,65 +34,131 @@ public class LevelInitializer : MonoBehaviour
 
         Debug.Log(
             "Load Level : "
-            + data.levelName
+            + levelData.levelName
         );
 
 
 
-        SetupBoss(data);
+        SetupGrid();
 
 
-        SetupGrid(data);
+        SetupBoss();
+
+
+        SetupAbility();
 
     }
 
 
 
 
-    private void SetupBoss(LevelData data)
-    {
-
-        BossHealth boss =
-            FindFirstObjectByType<BossHealth>();
-
-
-        if (boss == null)
-            return;
 
 
 
-        Debug.Log(
-            "Boss : "
-            + data.bossName
-        );
-
-
-
-        // nanti kita tambah setter HP
-
-    }
-
-
-
-
-    private void SetupGrid(LevelData data)
+    private void SetupGrid()
     {
 
         GridManager grid =
             FindFirstObjectByType<GridManager>();
 
 
-        if (grid == null)
+        if(grid == null)
+        {
+            Debug.LogError(
+                "GridManager tidak ditemukan"
+            );
+
             return;
+        }
+
+
+
+        grid.InitializeGrid(
+            levelData.gridWidth,
+            levelData.gridHeight
+        );
 
 
 
         Debug.Log(
             "Grid : "
-            + data.gridWidth +
-            " x " +
-            data.gridHeight
+            + levelData.gridWidth
+            + " x "
+            + levelData.gridHeight
         );
+
+    }
+
+
+
+
+
+
+
+
+
+    private void SetupBoss()
+    {
+
+        BossHealth boss =
+            FindFirstObjectByType<BossHealth>();
+
+
+        if(boss != null)
+        {
+
+            boss.SetHealth(
+                levelData.bossHP
+            );
+
+
+            Debug.Log(
+                "Boss HP : "
+                + levelData.bossHP
+            );
+
+        }
+
+
+
+        BossAI ai =
+            FindFirstObjectByType<BossAI>();
+
+
+        if(ai != null)
+        {
+
+            ai.SetAccuracy(
+                levelData.accuracy
+            );
+
+        }
+
+    }
+
+
+
+
+
+
+
+
+    private void SetupAbility()
+    {
+
+        BossAbilityManager ability =
+            FindFirstObjectByType<BossAbilityManager>();
+
+
+
+        if(ability != null)
+        {
+
+            ability.ApplyLevelData(
+                levelData
+            );
+
+        }
 
     }
 

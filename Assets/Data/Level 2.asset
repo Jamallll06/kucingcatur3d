@@ -14,11 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LevelData
   levelName: 
   levelNumber: 2
-  sceneName: Level 2
-  bossName: 
-  bossHP: 0
-  useBarrier: 0
-  useSummon: 0
-  useRage: 0
   gridWidth: 8
   gridHeight: 8
+  bossName: 
+  bossHP: 10
+  useBarrier: 1
+  useLaser: 0
+  useSummon: 0
+  useRage: 0
+  barrierCount: 3
+  barrierDuration: 3
+  accuracy: 0.65

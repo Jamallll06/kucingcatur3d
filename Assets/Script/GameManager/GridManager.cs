@@ -27,6 +27,7 @@ public class GridManager : MonoBehaviour
 
     private Tile selectedTile;
     private ChessPiece selectedPiece;
+    private bool isInitialized;
 
     private void Awake()
     {
@@ -37,7 +38,6 @@ public class GridManager : MonoBehaviour
         }
 
         Instance = this;
-        GenerateGrid();
     }
 
     private void GenerateGrid()
@@ -149,4 +149,92 @@ public class GridManager : MonoBehaviour
 
         selectedTile = null;
     }
+
+    public bool IsTileAvailable(Vector2Int position)
+    {
+        Tile tile = GetTile(position);
+
+        if (tile == null)
+            return false;
+
+
+        if (tile.IsBlocked)
+            return false;
+
+
+        if (tile.IsOccupied)
+            return false;
+
+
+        return true;
+    }
+
+    public Tile GetRandomFreeTile()
+    {
+        List<Tile> availableTiles = new List<Tile>();
+
+
+        foreach (Tile tile in Tiles)
+        {
+            if (tile == null)
+                continue;
+
+
+            if (tile.IsOccupied)
+                continue;
+
+
+            if (tile.IsBlocked)
+                continue;
+
+
+            availableTiles.Add(tile);
+        }
+
+
+        if (availableTiles.Count == 0)
+            return null;
+
+
+        return availableTiles[
+            Random.Range(0, availableTiles.Count)
+        ];
+    }
+
+    public void ApplyGridSize(int newWidth, int newHeight)
+    {
+        width = newWidth;
+        height = newHeight;
+    }
+
+    public void InitializeGrid(
+    int newWidth,
+    int newHeight
+    )
+    {
+
+        if (isInitialized)
+            return;
+
+
+
+        width = newWidth;
+
+        height = newHeight;
+
+
+
+        GenerateGrid();
+
+
+
+        isInitialized = true;
+
+
+        Debug.Log(
+            $"Grid Created {width} x {height}"
+        );
+
+    }
+
 }

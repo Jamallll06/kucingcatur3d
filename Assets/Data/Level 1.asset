@@ -14,11 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LevelData
   levelName: Dark Forrest
   levelNumber: 1
-  sceneName: Level 1
-  bossName: Dark Pawn
-  bossHP: 50
-  useBarrier: 0
-  useSummon: 0
-  useRage: 0
   gridWidth: 8
   gridHeight: 8
+  bossName: Dark Pawn
+  bossHP: 20
+  useBarrier: 0
+  useLaser: 0
+  useSummon: 0
+  useRage: 0
+  barrierCount: 3
+  barrierDuration: 3
+  laserWarningTime: 1
+  laserDamage: 1
+  accuracy: 0.5

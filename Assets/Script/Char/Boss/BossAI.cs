@@ -46,6 +46,10 @@ public class BossAI : MonoBehaviour
     private bool isParryWindowOpen;
     private bool parrySucceeded;
 
+    [Header("Rage")]
+    private float damageMultiplier = 1f;
+    private float speedMultiplier = 1f;
+
     private void Start()
     {
         bossHealth = GetComponent<BossHealth>();
@@ -405,14 +409,36 @@ public class BossAI : MonoBehaviour
         return (BossAttackPattern)phase3Pattern;
     }
 
-    public void SetAccuracy(float accuracy)
+    public void SetAccuracy(float value)
     {
-        targetAccuracy = accuracy;
+        targetAccuracy =
+            Mathf.Clamp01(value);
+
+
+        Debug.Log(
+            "Boss Accuracy berubah : "
+            + targetAccuracy
+        );
     }
 
     public void SetTelegraph(float duration)
     {
         telegraphDuration = duration;
+    }
+
+    public void ApplyRage(
+    float damage,
+    float speed
+    )
+    {
+        damageMultiplier = damage;
+
+        speedMultiplier = speed;
+
+
+        Debug.Log(
+            "Boss mendapatkan Rage Buff"
+        );
     }
 
 }

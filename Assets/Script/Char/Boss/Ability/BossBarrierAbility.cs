@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -5,8 +6,10 @@ using UnityEngine;
 public class BossBarrierAbility : MonoBehaviour
 {
 
+    [Header("Barrier Setting")]
+
     [SerializeField]
-    private Barrier barrierPrefab;
+    private GameObject barrierPrefab;
 
 
     [SerializeField]
@@ -18,101 +21,154 @@ public class BossBarrierAbility : MonoBehaviour
 
 
 
-    private List<Barrier> activeBarriers =
-        new List<Barrier>();
+    private readonly List<GameObject> activeBarriers =
+        new List<GameObject>();
 
 
 
-    public void SpawnBarrier()
-    {
-
-        ClearBarrier();
-
-
-        for (int i = 0; i < barrierCount; i++)
-        {
-
-            Tile tile =
-                GridManager.Instance.GetRandomFreeTile();
-
-
-            if (tile == null)
-                continue;
-
-
-
-            Barrier barrier =
-                Instantiate(
-                    barrierPrefab,
-                    tile.transform.position +
-                    Vector3.up * 0.5f,
-                    Quaternion.identity
-                );
-
-
-
-            barrier.Initialize(
-                tile,
-                barrierDuration
-            );
-
-
-            activeBarriers.Add(barrier);
-
-        }
-
-
-        Debug.Log(
-            "Barrier aktif selama "
-            + barrierDuration
-            + " turn"
-        );
-
-    }
-
-
-
-
-
-
-    public void ReduceBarrierTurn()
-    {
-
-        foreach (Barrier barrier in activeBarriers)
-        {
-            if (barrier != null)
-            {
-                barrier.ReduceTurn();
-            }
-        }
-
-
-        activeBarriers.RemoveAll(
-            x => x == null
-        );
-
-    }
 
 
     public void SetSetting(
         int count,
         int duration
     )
-        {
-            barrierCount = count;
+    {
+        barrierCount = count;
+        barrierDuration = duration;
 
-            barrierDuration = duration;
+
+        Debug.Log(
+            $"Barrier Setting : {count} | {duration}"
+        );
+    }
+
+
+
+
+
+
+
+    public void SpawnBarrier()
+    {
+
+        if (GridManager.Instance == null)
+        {
+            Debug.LogWarning(
+                "GridManager tidak ditemukan"
+            );
+
+            return;
         }
 
 
 
-    public void ClearBarrier()
+        ClearOldBarrier();
+
+
+
+        for (int i = 0;
+            i < barrierCount;
+            i++)
+        {
+
+            Tile tile =
+                GridManager.Instance
+                .GetRandomFreeTile();
+
+
+
+            if (tile == null)
+                break;
+
+
+
+            CreateBarrier(tile);
+
+        }
+
+
+    }
+
+
+
+
+
+
+
+
+
+    private void CreateBarrier(Tile tile)
     {
 
-        foreach (Barrier barrier in activeBarriers)
+        if (barrierPrefab == null)
         {
+            Debug.LogWarning(
+                "Barrier Prefab belum dipasang"
+            );
+
+            return;
+        }
+
+
+
+        GameObject barrier =
+            Instantiate(
+                barrierPrefab,
+                tile.transform.position,
+                Quaternion.identity
+            );
+
+
+
+        activeBarriers.Add(
+            barrier
+        );
+
+
+
+        Barrier barrierScript =
+            barrier.GetComponent<Barrier>();
+
+
+
+        if (barrierScript != null)
+        {
+
+            barrierScript.Initialize(
+                tile,
+                barrierDuration
+            );
+
+        }
+
+
+
+        Debug.Log(
+            "Barrier dibuat di "
+            + tile.GridPosition
+        );
+
+    }
+
+
+
+
+
+
+
+
+
+    private void ClearOldBarrier()
+    {
+
+        foreach (GameObject barrier in activeBarriers)
+        {
+
             if (barrier != null)
-                Destroy(barrier.gameObject);
+            {
+                Destroy(barrier);
+            }
+
         }
 
 

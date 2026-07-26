@@ -1,37 +1,37 @@
 using UnityEngine;
 
-
 public class BossHealth : MonoBehaviour
 {
-
+    [Header("Health")]
     [SerializeField]
     private int maxHealth = 20;
 
 
-
     public int MaxHealth => maxHealth;
-
 
     public int CurrentHealth { get; private set; }
 
-
     public bool IsDefeated { get; private set; }
 
+
+
+    private BossAbilityManager abilityManager;
 
 
 
     private void Awake()
     {
         CurrentHealth = maxHealth;
-    }
 
+        abilityManager =
+            GetComponent<BossAbilityManager>();
+    }
 
 
 
 
     public void SetHealth(int value)
     {
-
         maxHealth = value;
 
         CurrentHealth = value;
@@ -39,22 +39,17 @@ public class BossHealth : MonoBehaviour
         IsDefeated = false;
 
 
-
         Debug.Log(
-            $"Boss HP diatur menjadi {CurrentHealth}"
+            "Boss HP Set : " +
+            CurrentHealth
         );
-
     }
-
-
-
 
 
 
 
     public void TakeDamage(int damage)
     {
-
         if (IsDefeated)
             return;
 
@@ -63,29 +58,17 @@ public class BossHealth : MonoBehaviour
         CurrentHealth -= damage;
 
 
-
-        if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayBossHit();
-
-
-
-
-        if (CameraShake.Instance != null)
-        {
-            CameraShake.Instance.Shake(
-                0.2f,
-                0.08f
-            );
-        }
-
-
-
-
         Debug.Log(
-            $"Boss menerima {damage} damage. " +
-            $"HP Boss: {CurrentHealth}/{maxHealth}"
+            $"Boss menerima {damage} damage " +
+            $"HP : {CurrentHealth}/{MaxHealth}"
         );
 
+
+
+        if (abilityManager != null)
+        {
+            abilityManager.CheckAbility();
+        }
 
 
 
@@ -100,56 +83,33 @@ public class BossHealth : MonoBehaviour
 
 
 
-
-
-
     private void Defeat()
     {
-
         IsDefeated = true;
 
 
-
         Debug.Log(
-            "Boss dikalahkan!"
+            "BOSS KALAH"
         );
 
 
 
-
-        // Matikan AI Boss
-
-        BossAI bossAI =
+        BossAI ai =
             GetComponent<BossAI>();
 
-
-        if (bossAI != null)
-            bossAI.enabled = false;
-
+        if (ai != null)
+            ai.enabled = false;
 
 
 
-
-
-
-        // Kirim event ke Level
-
-        BossLevelComplete levelComplete =
+        BossLevelComplete complete =
             GetComponent<BossLevelComplete>();
 
 
-        if (levelComplete != null)
-        {
-            levelComplete.BossDefeated();
-        }
+        if (complete != null)
+            complete.BossDefeated();
 
 
-
-
-
-
-
-        // Victory UI
 
         if (GameManager.Instance != null)
         {
@@ -158,11 +118,6 @@ public class BossHealth : MonoBehaviour
 
 
 
-
-
-
         gameObject.SetActive(false);
-
     }
-
 }

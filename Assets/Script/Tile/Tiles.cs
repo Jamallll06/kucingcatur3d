@@ -4,43 +4,86 @@ using UnityEngine;
 public class Tile : MonoBehaviour
 {
     public Vector2Int GridPosition { get; private set; }
+
     public bool IsOccupied { get; set; }
+
     public bool IsBlocked { get; private set; }
 
 
     private MeshRenderer meshRenderer;
+
     private Material defaultMaterial;
+
 
     private void Awake()
     {
         meshRenderer = GetComponent<MeshRenderer>();
     }
 
-    public void Initialize(Vector2Int position, Material baseMaterial)
+
+
+    public void Initialize(
+        Vector2Int position,
+        Material baseMaterial
+    )
     {
         GridPosition = position;
+
         defaultMaterial = baseMaterial;
-        meshRenderer.sharedMaterial = baseMaterial;
-        gameObject.name = $"Tile ({position.x}, {position.y})";
+
+
+        if (meshRenderer != null)
+            meshRenderer.sharedMaterial = baseMaterial;
+
+
+        gameObject.name =
+            $"Tile ({position.x},{position.y})";
     }
 
-    public void SetMaterial(Material material)
+
+
+
+    public void SetMaterial(
+        Material material
+    )
     {
-        meshRenderer.sharedMaterial = material;
+        if (meshRenderer != null)
+            meshRenderer.sharedMaterial = material;
     }
+
+
+
+
 
     public void ResetTile()
     {
-        meshRenderer.sharedMaterial = defaultMaterial;
+        if (meshRenderer != null)
+            meshRenderer.sharedMaterial =
+                defaultMaterial;
     }
 
-    private void OnMouseDown()
-    {
-        GridManager.Instance.SelectTile(this);
-    }
 
-    public void SetBlocked(bool value)
+
+
+
+    public void SetBlocked(
+        bool value
+    )
     {
         IsBlocked = value;
     }
+
+
+
+
+
+    private void OnMouseDown()
+    {
+        if (GridManager.Instance != null)
+        {
+            GridManager.Instance
+                .SelectTile(this);
+        }
+    }
+
 }

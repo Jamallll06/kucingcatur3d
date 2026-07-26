@@ -12,13 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca16de43d67d0ee49a4387f7f743592b, type: 3}
   m_Name: Level 5
   m_EditorClassIdentifier: Assembly-CSharp::LevelData
-  levelName: 
+  levelName: ppp
   levelNumber: 5
-  sceneName: Level 5
-  bossName: 
-  bossHP: 0
-  useBarrier: 0
-  useSummon: 0
-  useRage: 0
   gridWidth: 8
   gridHeight: 8
+  bossName: 
+  bossHP: 100
+  accuracy: 1
+  useBarrier: 1
+  useLaser: 1
+  useSummon: 1
+  useRage: 1
+  abilityHealthPercent: 0.5
+  abilityCooldown: 2
+  barrierCount: 3
+  barrierDuration: 3
+  laserWarningTime: 1
+  laserDamage: 1

@@ -4,14 +4,13 @@ using UnityEngine.SceneManagement;
 
 public class LevelManager : MonoBehaviour
 {
-
-    public static LevelManager Instance;
+    public static LevelManager Instance { get; private set; }
 
 
     [Header("Level Database")]
-    [SerializeField] private LevelData[] levels;
+    [SerializeField]
+    private LevelData[] levels;
 
-    
 
     private int currentLevelIndex = 0;
 
@@ -23,8 +22,8 @@ public class LevelManager : MonoBehaviour
         {
             if (levels == null || levels.Length == 0)
             {
-                Debug.LogWarning(
-                    "LevelManager: Tidak ada LevelData!"
+                Debug.LogError(
+                    "LevelManager : LevelData kosong!"
                 );
 
                 return null;
@@ -34,8 +33,8 @@ public class LevelManager : MonoBehaviour
             if (currentLevelIndex < 0 ||
                 currentLevelIndex >= levels.Length)
             {
-                Debug.LogWarning(
-                    "LevelManager: Index level tidak valid : "
+                Debug.LogError(
+                    "Level index tidak valid : "
                     + currentLevelIndex
                 );
 
@@ -49,22 +48,15 @@ public class LevelManager : MonoBehaviour
 
 
 
-    public int CurrentLevel
-    {
-        get
-        {
-            return currentLevelIndex + 1;
-        }
-    }
-
-
+    public int CurrentLevel =>
+        currentLevelIndex + 1;
 
 
 
     private void Awake()
     {
-
-        if (Instance != null && Instance != this)
+        if (Instance != null &&
+            Instance != this)
         {
             Destroy(gameObject);
             return;
@@ -72,17 +64,19 @@ public class LevelManager : MonoBehaviour
 
 
         Instance = this;
-
-
-        DontDestroyOnLoad(gameObject);
-
     }
 
 
 
-
-
     private void Start()
+    {
+
+        LoadProgress();
+    }
+
+
+
+    private void LoadProgress()
     {
 
         currentLevelIndex =
@@ -93,147 +87,104 @@ public class LevelManager : MonoBehaviour
 
 
 
-        // Safety jika save rusak
-        if (levels == null ||
-            levels.Length == 0)
-        {
-            Debug.LogWarning(
-                "LevelManager belum memiliki LevelData"
-            );
-
-            return;
-        }
-
-
+        // Anti corrupt save
 
         if (currentLevelIndex >= levels.Length)
         {
+            Debug.LogWarning(
+                "Save level corrupt, reset ke Level 1"
+            );
+
+
             currentLevelIndex = 0;
-        }
-
-    }
 
 
-
-
-
-    // Dipanggil saat boss kalah
-    public void CompleteLevel()
-    {
-
-        if (CurrentLevelData == null)
-        {
-            Debug.LogWarning(
-                "Tidak bisa menyelesaikan level. Data kosong."
-            );
-
-            return;
+            SaveProgress();
         }
 
 
 
         Debug.Log(
-            "LEVEL SELESAI : "
-            + CurrentLevelData.levelName
-        );
-
-
-
-        currentLevelIndex++;
-
-
-
-        SaveProgress();
-
-
-
-        // Semua level selesai
-        if (currentLevelIndex >= levels.Length)
-        {
-
-            GameComplete();
-
-            return;
-
-        }
-
-
-
-        LoadNextLevel();
-
-    }
-
-
-
-
-
-    // Kompatibel dengan script lama
-    public void LevelComplete()
-    {
-
-        CompleteLevel();
-
-    }
-
-
-
-
-
-    private void LoadNextLevel()
-    {
-
-        if (CurrentLevelData == null)
-        {
-            Debug.LogWarning(
-                "Level berikutnya tidak ditemukan"
-            );
-
-            return;
-        }
-
-
-
-        Debug.Log(
-            "LOAD LEVEL : "
-            + CurrentLevelData.levelName
-        );
-
-
-
-        SceneManager.LoadScene(
-            CurrentLevelData.levelNumber
+            "Current Level : "
+            + CurrentLevel
         );
 
     }
-
 
 
 
 
     public void StartLevel(int index)
     {
-
-        if (levels == null ||
-           index < 0 ||
+        if (index < 0 ||
            index >= levels.Length)
         {
             Debug.LogWarning(
-                "Level index tidak tersedia"
+                "Level tidak tersedia"
             );
 
             return;
         }
 
 
-
         currentLevelIndex = index;
+
+        SaveProgress();
+
+        LoadLevelScene();
+    }
+
+
+
+
+
+    public void LevelComplete()
+    {
+        Debug.Log(
+            "Level selesai : "
+            + CurrentLevelData.levelName
+        );
+
+
+        currentLevelIndex++;
+
+
+        if (currentLevelIndex >= levels.Length)
+        {
+            GameComplete();
+            return;
+        }
 
 
         SaveProgress();
 
 
-        LoadNextLevel();
+        LoadLevelScene();
+    }
 
+
+
+
+    private void LoadLevelScene()
+    {
+        LevelData data =
+            CurrentLevelData;
+
+
+        if (data == null)
+            return;
+
+
+
+        Debug.Log(
+            "Loading Scene : "
+            + data.levelNumber
+        );
+
+
+        SceneManager.LoadScene(
+            data.levelNumber
+        );
     }
 
 
@@ -242,7 +193,6 @@ public class LevelManager : MonoBehaviour
 
     private void SaveProgress()
     {
-
         PlayerPrefs.SetInt(
             "CURRENT_LEVEL",
             currentLevelIndex
@@ -251,6 +201,25 @@ public class LevelManager : MonoBehaviour
 
         PlayerPrefs.Save();
 
+
+        Debug.Log(
+            "Progress Saved : "
+            + currentLevelIndex
+        );
+    }
+
+
+
+
+
+    private void GameComplete()
+    {
+        Debug.Log(
+            "SEMUA LEVEL SELESAI"
+        );
+
+
+        // nanti bisa load ending scene
     }
 
 
@@ -259,7 +228,6 @@ public class LevelManager : MonoBehaviour
 
     public void ResetProgress()
     {
-
         PlayerPrefs.DeleteKey(
             "CURRENT_LEVEL"
         );
@@ -269,25 +237,7 @@ public class LevelManager : MonoBehaviour
 
 
         Debug.Log(
-            "Progress level direset"
+            "Progress Reset"
         );
-
     }
-
-
-
-
-
-    private void GameComplete()
-    {
-
-        Debug.Log(
-            "SEMUA LEVEL SELESAI!"
-        );
-
-
-        // Nanti bisa load Ending Scene
-
-    }
-
 }

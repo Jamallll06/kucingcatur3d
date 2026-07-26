@@ -1,44 +1,105 @@
+using System.Collections;
 using UnityEngine;
+
 
 public class BossAbilityManager : MonoBehaviour
 {
+
     [Header("Ability Enable")]
+
     public bool useBarrier;
-    public bool useSummon;
+
     public bool useLaser;
+
+    public bool useSummon;
+
     public bool useRage;
 
 
-    [Header("Trigger")]
-    [SerializeField] private float abilityHealthPercent = 0.5f;
+
+    [Header("Setting")]
+
+    [Range(0f, 1f)]
+    public float abilityHealthPercent = 0.8f;
+
+
+    public int abilityCooldown = 2;
+
+
+
+    private int cooldownCounter;
+
 
 
     private BossHealth bossHealth;
 
+
+
     private BossBarrierAbility barrierAbility;
 
-    private bool abilityUsed = false;
+    private BossLaserAbility laserAbility;
+
+    private BossSummonAbility summonAbility;
+
+    private BossRageAbility rageAbility;
+
 
 
 
     private void Awake()
     {
-        bossHealth = GetComponent<BossHealth>();
+
+        bossHealth =
+            GetComponent<BossHealth>();
+
 
         barrierAbility =
             GetComponent<BossBarrierAbility>();
+
+
+        laserAbility =
+            GetComponent<BossLaserAbility>();
+
+
+        summonAbility =
+            GetComponent<BossSummonAbility>();
+
+
+        rageAbility =
+            GetComponent<BossRageAbility>();
+
     }
+
+
 
 
 
     public void CheckAbility()
     {
-        if (abilityUsed)
-            return;
+        StartCoroutine(
+            ExecuteAbilityRoutine()
+        );
+    }
 
+
+
+
+
+
+    public IEnumerator ExecuteAbilityRoutine()
+    {
 
         if (bossHealth == null)
-            return;
+            yield break;
+
+
+
+        cooldownCounter++;
+
+
+
+        if (cooldownCounter < abilityCooldown)
+            yield break;
 
 
 
@@ -48,12 +109,16 @@ public class BossAbilityManager : MonoBehaviour
 
 
 
-        if (hpPercent <= abilityHealthPercent)
-        {
-            ExecuteAbility();
+        if (hpPercent > abilityHealthPercent)
+            yield break;
 
-            abilityUsed = true;
-        }
+
+
+        cooldownCounter = 0;
+
+
+
+        yield return ExecuteAbility();
 
     }
 
@@ -61,99 +126,83 @@ public class BossAbilityManager : MonoBehaviour
 
 
 
-    private void ExecuteAbility()
+
+
+    private IEnumerator ExecuteAbility()
     {
 
         Debug.Log(
-            "Boss menggunakan Ability!"
+            "BOSS MENGGUNAKAN ABILITY"
         );
 
 
 
-        if (useBarrier)
+        if (useBarrier &&
+           barrierAbility != null)
         {
-            UseBarrier();
-        }
 
-
-
-        if (useLaser)
-        {
-            UseLaser();
-        }
-
-
-
-        if (useSummon)
-        {
-            UseSummon();
-        }
-
-
-
-        if (useRage)
-        {
-            UseRage();
-        }
-
-    }
-
-
-
-
-
-
-    private void UseBarrier()
-    {
-        if (barrierAbility != null)
-        {
             barrierAbility.SpawnBarrier();
+
+
+            yield return
+            new WaitForSeconds(0.5f);
+
         }
 
 
-        Debug.Log(
-            "Barrier Aktif"
-        );
+
+
+
+        if (useLaser &&
+           laserAbility != null)
+        {
+
+            laserAbility.ExecuteLaser();
+
+
+            yield return
+            new WaitForSeconds(1.5f);
+
+        }
+
+
+
+
+
+        if (useSummon &&
+           summonAbility != null)
+        {
+
+            summonAbility.Summon();
+
+
+            yield return
+            new WaitForSeconds(0.5f);
+
+        }
+
+
+
+
+
+
+        if (useRage &&
+           rageAbility != null)
+        {
+
+            rageAbility.Activate();
+
+
+            yield return
+            new WaitForSeconds(0.5f);
+
+        }
+
     }
 
 
 
 
-
-    private void UseLaser()
-    {
-        Debug.Log(
-            "Laser Ability Aktif"
-        );
-
-        // nanti Level 3
-    }
-
-
-
-
-
-    private void UseSummon()
-    {
-        Debug.Log(
-            "Summon Aktif"
-        );
-
-        // nanti Level 5
-    }
-
-
-
-
-
-    private void UseRage()
-    {
-        Debug.Log(
-            "Rage Aktif"
-        );
-
-        // nanti Level 5
-    }
 
     public void ApplyLevelData(LevelData data)
     {
@@ -175,6 +224,17 @@ public class BossAbilityManager : MonoBehaviour
 
 
 
+        abilityCooldown =
+            data.abilityCooldown;
+
+
+
+        abilityHealthPercent =
+            data.abilityHealthPercent;
+
+
+
+
         if (barrierAbility != null)
         {
             barrierAbility.SetSetting(
@@ -184,9 +244,22 @@ public class BossAbilityManager : MonoBehaviour
         }
 
 
+
+
+        if (laserAbility != null)
+        {
+
+            laserAbility.SetSetting(
+                data.laserWarningTime,
+                data.laserDamage
+            );
+
+        }
+
+
+
         Debug.Log(
-            "Boss Ability Loaded : "
-            + data.levelName
+            "Boss Ability Loaded"
         );
 
     }

@@ -12,16 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca16de43d67d0ee49a4387f7f743592b, type: 3}
   m_Name: Level 2
   m_EditorClassIdentifier: Assembly-CSharp::LevelData
-  levelName: 
+  levelName: p
   levelNumber: 2
   gridWidth: 8
   gridHeight: 8
   bossName: 
-  bossHP: 10
+  bossHP: 50
+  accuracy: 0.65
   useBarrier: 1
   useLaser: 0
   useSummon: 0
   useRage: 0
+  abilityHealthPercent: 0.5
+  abilityCooldown: 2
   barrierCount: 3
   barrierDuration: 3
-  accuracy: 0.65
+  laserWarningTime: 1
+  laserDamage: 1

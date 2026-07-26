@@ -1,7 +1,6 @@
 using System.Collections;
 using UnityEngine;
 
-
 public enum TurnState
 {
     PlayerTurn,
@@ -9,263 +8,107 @@ public enum TurnState
     GameOver
 }
 
-
-
 public class TurnManager : MonoBehaviour
 {
-
     public static TurnManager Instance { get; private set; }
 
-
-
-    [Header("Boss Reference")]
+    [Header("Boss")]
     [SerializeField] private BossAI bossAI;
+    [SerializeField] private BossAbilityManager bossAbility;
 
-
-
-    [Header("Timing")]
+    [Header("Delay")]
     [SerializeField] private float bossTurnDelay = 0.5f;
-
-
 
     public TurnState CurrentTurn { get; private set; }
 
+    public bool IsPlayerTurn => CurrentTurn == TurnState.PlayerTurn;
+    public bool IsBossTurn => CurrentTurn == TurnState.BossTurn;
 
-
-    public bool IsPlayerTurn
-    {
-        get
-        {
-            return CurrentTurn == TurnState.PlayerTurn;
-        }
-    }
-
-
-
-
+    private bool turnRunning;
 
     private void Awake()
     {
-
-        if (Instance != null &&
-           Instance != this)
+        if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
 
-
         Instance = this;
-
     }
-
-
-
-
-
 
     private void Start()
     {
         BeginPlayerTurn();
     }
 
-
-
-
-
-
-
-
     public void BeginPlayerTurn()
     {
-
         if (CurrentTurn == TurnState.GameOver)
             return;
 
+        CurrentTurn = TurnState.PlayerTurn;
+        turnRunning = false;
 
-
-        CurrentTurn =
-            TurnState.PlayerTurn;
-
-
-
-        Debug.Log(
-            "TURN : PLAYER"
-        );
-
+        Debug.Log("===== PLAYER TURN =====");
     }
-
-
-
-
-
-
-
-
 
     public void EndPlayerTurn()
     {
-
-        if (!IsPlayerTurn)
+        if (CurrentTurn != TurnState.PlayerTurn)
             return;
 
+        if (turnRunning)
+            return;
 
-
-        StartCoroutine(
-            BossTurnRoutine()
-        );
-
+        StartCoroutine(BossTurnRoutine());
     }
-
-
-
-
-
-
-
-
 
     private IEnumerator BossTurnRoutine()
     {
+        turnRunning = true;
 
-        CurrentTurn =
-            TurnState.BossTurn;
+        CurrentTurn = TurnState.BossTurn;
 
+        Debug.Log("===== BOSS TURN =====");
 
+        yield return new WaitForSeconds(bossTurnDelay);
 
-        Debug.Log(
-            "TURN : BOSS"
-        );
-
-
-
-        yield return new WaitForSeconds(
-            bossTurnDelay
-        );
-
-
-
-
-
-        // =========================
-        // BOSS AI ATTACK
-        // =========================
-
-
-        if (bossAI != null &&
-           bossAI.gameObject.activeInHierarchy)
+        // Ability Boss
+        if (bossAbility != null)
         {
-
-            yield return bossAI.ExecuteTurn();
-
+            yield return bossAbility.ExecuteAbilityRoutine();
         }
 
-        else
+        // Gerakan Boss
+        if (bossAI != null &&
+            bossAI.gameObject.activeInHierarchy)
         {
+            yield return bossAI.ExecuteTurn();
+        }
 
-            Debug.Log(
-                "Boss AI tidak ditemukan"
+        // Gerakan seluruh Minion
+        MinionAI[] minions =
+            FindObjectsByType<MinionAI>(
+                FindObjectsSortMode.None
             );
 
-        }
-
-
-
-
-
-
-
-        // =========================
-        // BOSS ABILITY CHECK
-        // =========================
-
-
-        BossAbilityManager ability =
-            FindFirstObjectByType<BossAbilityManager>();
-
-
-
-        if (ability != null)
+        foreach (MinionAI minion in minions)
         {
-
-            ability.CheckAbility();
-
+            if (minion != null)
+                yield return minion.ExecuteTurn();
         }
 
-
-
-
-
-
-
-
-        // =========================
-        // UPDATE BARRIER
-        // =========================
-
-
-        BossBarrierAbility barrier =
-            FindFirstObjectByType<BossBarrierAbility>();
-
-
-
-        if (barrier != null)
-        {
-
-            barrier.ReduceBarrierTurn();
-
-        }
-
-
-
-
-
-
-
-
-        yield return new WaitForSeconds(
-            bossTurnDelay
-        );
-
-
+        yield return new WaitForSeconds(bossTurnDelay);
 
         BeginPlayerTurn();
-
     }
-
-
-
-
-
-
-
-
 
     public void EndGame()
     {
+        CurrentTurn = TurnState.GameOver;
+        turnRunning = false;
 
-        CurrentTurn =
-            TurnState.GameOver;
-
-
-
-        Debug.Log(
-            "TURN SYSTEM STOP"
-        );
-
+        Debug.Log("===== GAME OVER =====");
     }
-
-
-
-
-
-
-
-
-
-    public bool IsBossTurn()
-    {
-        return CurrentTurn == TurnState.BossTurn;
-    }
-
 }

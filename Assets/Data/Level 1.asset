@@ -14,16 +14,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LevelData
   levelName: Dark Forrest
   levelNumber: 1
-  gridWidth: 8
-  gridHeight: 8
+  gridWidth: 10
+  gridHeight: 10
   bossName: Dark Pawn
   bossHP: 20
+  accuracy: 0.5
   useBarrier: 0
   useLaser: 0
   useSummon: 0
   useRage: 0
+  abilityHealthPercent: 0.5
+  abilityCooldown: 2
   barrierCount: 3
   barrierDuration: 3
   laserWarningTime: 1
   laserDamage: 1
-  accuracy: 0.5
+  summonCount: 2
+  maxMinion: 4

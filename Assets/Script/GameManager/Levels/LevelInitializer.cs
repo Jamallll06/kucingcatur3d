@@ -3,26 +3,30 @@ using UnityEngine;
 
 public class LevelInitializer : MonoBehaviour
 {
+
     public static LevelInitializer Instance;
+
 
 
     private void Awake()
     {
+
         Instance = this;
-    }
 
 
-
-    private void Start()
-    {
         ApplyLevelData();
+
     }
+
+
+
 
 
 
 
     private void ApplyLevelData()
     {
+
         if (LevelManager.Instance == null)
         {
             Debug.LogError(
@@ -31,6 +35,8 @@ public class LevelInitializer : MonoBehaviour
 
             return;
         }
+
+
 
 
 
@@ -50,83 +56,23 @@ public class LevelInitializer : MonoBehaviour
 
 
 
-        Debug.Log(
-            "Memulai : "
-            + data.levelName
-        );
+
+
+        // GRID DULU
+        SetupGrid(data);
 
 
 
+        // BOSS SETELAH GRID
         SetupBoss(data);
 
 
-        SetupGrid(data);
-    }
 
+        Debug.Log(
+            "Level Loaded : "
+            + data.levelName
+        );
 
-
-
-
-
-    private void SetupBoss(LevelData data)
-    {
-        BossHealth boss =
-            FindFirstObjectByType<BossHealth>();
-
-
-        if (boss != null)
-        {
-            boss.SetHealth(
-                data.bossHP
-            );
-
-
-            Debug.Log(
-                "Boss HP : "
-                + data.bossHP
-            );
-        }
-
-
-
-
-
-        BossAI ai =
-            FindFirstObjectByType<BossAI>();
-
-
-        if (ai != null)
-        {
-            ai.SetAccuracy(
-                data.accuracy
-            );
-
-
-            Debug.Log(
-                "Boss Accuracy : "
-                + data.accuracy
-            );
-        }
-
-
-
-
-
-        BossAbilityManager ability =
-            FindFirstObjectByType<BossAbilityManager>();
-
-
-        if (ability != null)
-        {
-            ability.ApplyLevelData(
-                data
-            );
-
-
-            Debug.Log(
-                "Boss Ability Loaded"
-            );
-        }
     }
 
 
@@ -135,11 +81,14 @@ public class LevelInitializer : MonoBehaviour
 
 
 
-    private void SetupGrid(LevelData data)
+
+    private void SetupGrid(
+        LevelData data)
     {
 
         GridManager grid =
             FindFirstObjectByType<GridManager>();
+
 
 
         if (grid == null)
@@ -158,13 +107,52 @@ public class LevelInitializer : MonoBehaviour
             data.gridHeight
         );
 
+    }
 
-        Debug.Log(
-            "Grid Setup : "
-            + data.gridWidth
-            + " x "
-            + data.gridHeight
-        );
+
+
+
+
+
+
+
+    private void SetupBoss(
+        LevelData data)
+    {
+
+        BossHealth boss =
+            FindFirstObjectByType<BossHealth>();
+
+
+        if (boss != null)
+            boss.SetHealth(
+                data.bossHP
+            );
+
+
+
+
+        BossAI ai =
+            FindFirstObjectByType<BossAI>();
+
+
+        if (ai != null)
+            ai.SetAccuracy(
+                data.accuracy
+            );
+
+
+
+
+
+        BossAbilityManager ability =
+            FindFirstObjectByType<BossAbilityManager>();
+
+
+        if (ability != null)
+            ability.ApplyLevelData(
+                data
+            );
 
     }
 

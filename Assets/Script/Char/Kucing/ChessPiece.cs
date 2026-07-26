@@ -48,23 +48,55 @@ public abstract class ChessPiece : MonoBehaviour
 
     protected virtual void Start()
     {
-        CurrentPosition = startingPosition;
-
-        transform.position =
-            GetWorldPosition(CurrentPosition);
-
-
-        Tile tile =
-            GridManager.Instance.GetTile(CurrentPosition);
-
-
-        if (tile != null)
-            tile.IsOccupied = true;
+        StartCoroutine(
+            InitializePiece()
+        );
     }
 
 
 
+    private IEnumerator InitializePiece()
+    {
 
+        while (GridManager.Instance == null)
+            yield return null;
+
+
+
+        while (GridManager.Instance.Tiles == null)
+            yield return null;
+
+
+
+        CurrentPosition =
+            startingPosition;
+
+
+
+        transform.position =
+            GetWorldPosition(
+                CurrentPosition
+            );
+
+
+
+        Tile tile =
+            GridManager.Instance.GetTile(
+                CurrentPosition
+            );
+
+
+
+        if (tile != null)
+            tile.IsOccupied = true;
+
+
+
+        Debug.Log(
+            "Hero Spawn : "
+            + CurrentPosition
+        );
+    }
 
     protected virtual void OnMouseDown()
     {
@@ -378,12 +410,14 @@ public abstract class ChessPiece : MonoBehaviour
 
 
 
-    protected Vector3 GetWorldPosition(Vector2Int position)
+    protected Vector3 GetWorldPosition(
+     Vector2Int position)
     {
 
         Tile tile =
-            GridManager.Instance.GetTile(position);
-
+            GridManager.Instance.GetTile(
+                position
+            );
 
 
         if (tile == null)
@@ -395,7 +429,6 @@ public abstract class ChessPiece : MonoBehaviour
                Vector3.up * heightAboveTile;
 
     }
-
 
 
 

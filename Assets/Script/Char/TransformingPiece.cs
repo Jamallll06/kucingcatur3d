@@ -49,12 +49,19 @@ public class TransformingPiece : ChessPiece
 
     protected override void Start()
     {
+
         base.Start();
 
+
+
         if (spriteRenderer == null)
-            spriteRenderer = GetComponent<SpriteRenderer>();
+            spriteRenderer =
+                GetComponent<SpriteRenderer>();
+
+
 
         ApplyFormVisual();
+
     }
 
     private void Update()

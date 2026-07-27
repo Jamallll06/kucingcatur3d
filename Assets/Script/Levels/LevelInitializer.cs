@@ -16,6 +16,11 @@ public class LevelInitializer : MonoBehaviour
 
         ApplyLevelData();
 
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayBattleMusic();
+        }
+
     }
 
 

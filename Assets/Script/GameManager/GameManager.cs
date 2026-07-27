@@ -1,99 +1,246 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+
+
 public class GameManager : MonoBehaviour
 {
+
     public static GameManager Instance { get; private set; }
 
-    [SerializeField] private GameObject victoryPanel;
-    [SerializeField] private GameObject gameOverPanel;
+
 
     public bool IsGameFinished { get; private set; }
 
+
+
+
+
+
+
+
     private void Awake()
     {
-        if (Instance != null && Instance != this)
+
+        if (Instance != null &&
+           Instance != this)
         {
             Destroy(gameObject);
             return;
         }
 
+
         Instance = this;
 
-        if (victoryPanel != null)
-            victoryPanel.SetActive(false);
-
-        if (gameOverPanel != null)
-            gameOverPanel.SetActive(false);
     }
+
+
+
+
+
+
+
+
+
+    // =========================
+    // PLAYER MENANG
+    // =========================
 
     public void Victory()
     {
+
         if (IsGameFinished)
             return;
+
 
 
         IsGameFinished = true;
 
 
-        if (victoryPanel != null)
-            victoryPanel.SetActive(true);
+
+        Debug.Log(
+            "PLAYER VICTORY"
+        );
 
 
 
         if (TurnManager.Instance != null)
-            TurnManager.Instance.EndGame();
+        {
+            TurnManager.Instance
+                .EndGame();
+        }
 
 
 
-        Debug.Log("VICTORY!");
+        if (LevelCompleteManager.Instance != null)
+        {
+
+            LevelCompleteManager.Instance
+                .LevelComplete();
+
+        }
+
     }
+
+
+
+
+
+
+
+
+
+    // =========================
+    // PLAYER KALAH
+    // =========================
+
+    public void GameOver()
+    {
+
+        if (IsGameFinished)
+            return;
+
+
+
+        IsGameFinished = true;
+
+
+
+        Debug.Log(
+            "GAME OVER"
+        );
+
+
+
+        if (TurnManager.Instance != null)
+        {
+            TurnManager.Instance
+                .EndGame();
+        }
+
+
+
+        if (DefeatScreenManager.Instance != null)
+        {
+
+            DefeatScreenManager.Instance
+                .ShowDefeat();
+
+        }
+
+    }
+
+
+
+
+
+
+
+
+
+    // =========================
+    // CEK HERO MATI
+    // =========================
 
     public void CheckGameOver()
     {
+
         if (IsGameFinished)
             return;
 
 
-        ChessPiece[] livingPieces = FindObjectsByType<ChessPiece>(
-            FindObjectsSortMode.None
-        );
+
+        ChessPiece[] pieces =
+            FindObjectsByType<ChessPiece>(
+                FindObjectsSortMode.None
+            );
 
 
-        if (livingPieces.Length > 0)
+
+        if (pieces.Length > 0)
             return;
 
 
 
-        IsGameFinished = true;
+        GameOver();
 
-
-        if (gameOverPanel != null)
-            gameOverPanel.SetActive(true);
-
-
-
-        if (TurnManager.Instance != null)
-            TurnManager.Instance.EndGame();
-
-
-
-        Debug.Log("GAME OVER!");
     }
+
+
+
+
+
+
+
+
 
     public void RestartGame()
     {
+
         Time.timeScale = 1f;
 
+
+
         SceneManager.LoadScene(
-            SceneManager.GetActiveScene().buildIndex
+            SceneManager.GetActiveScene()
+            .buildIndex
         );
+
     }
+
+
+
+
+
+
+
+
+
+    public void ReturnToMenu()
+    {
+
+        if (SceneLoader.Instance != null)
+        {
+
+            SceneLoader.Instance
+                .LoadScene(
+                    "MainMenu"
+                );
+
+        }
+        else
+        {
+
+            SceneManager.LoadScene(
+                "MainMenu"
+            );
+
+        }
+
+    }
+
+
+
+
+
+
+
+
 
     public void QuitGame()
     {
+
+#if UNITY_EDITOR
+
+        UnityEditor.EditorApplication
+            .isPlaying = false;
+
+#else
+
         Application.Quit();
 
-        Debug.Log("Keluar dari game.");
+#endif
+
     }
+
 }

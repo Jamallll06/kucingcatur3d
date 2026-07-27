@@ -156,6 +156,8 @@ public class LevelManager : MonoBehaviour
         }
 
 
+        UnlockLevel();
+
         SaveProgress();
 
 
@@ -206,6 +208,41 @@ public class LevelManager : MonoBehaviour
             "Progress Saved : "
             + currentLevelIndex
         );
+    }
+
+    private void UnlockLevel()
+    {
+
+        int unlock =
+            CurrentLevel + 1;
+
+
+        int saved =
+            PlayerPrefs.GetInt(
+                "UNLOCK_LEVEL",
+                1
+            );
+
+
+        if (unlock > saved)
+        {
+
+            PlayerPrefs.SetInt(
+                "UNLOCK_LEVEL",
+                unlock
+            );
+
+
+            PlayerPrefs.Save();
+
+
+            Debug.Log(
+                "Unlock Level "
+                + unlock
+            );
+
+        }
+
     }
 
 

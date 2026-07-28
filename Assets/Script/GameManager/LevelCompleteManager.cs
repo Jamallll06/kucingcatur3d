@@ -35,15 +35,11 @@ public class LevelCompleteManager : MonoBehaviour
 
 
 
-
-
-
-
     private void Awake()
     {
 
         if (Instance != null &&
-           Instance != this)
+            Instance != this)
         {
             Destroy(gameObject);
             return;
@@ -53,11 +49,6 @@ public class LevelCompleteManager : MonoBehaviour
         Instance = this;
 
     }
-
-
-
-
-
 
 
 
@@ -75,10 +66,11 @@ public class LevelCompleteManager : MonoBehaviour
 
 
 
+    // =====================================
+    // CALL WHEN BOSS DEFEATED
+    // =====================================
 
-
-
-    public void LevelComplete()
+    public void CompleteLevel()
     {
 
         if (completed)
@@ -102,13 +94,12 @@ public class LevelCompleteManager : MonoBehaviour
 
 
 
-
-
     private void ShowVictory()
     {
 
         if (victoryPanel != null)
             victoryPanel.SetActive(true);
+
 
 
 
@@ -120,8 +111,9 @@ public class LevelCompleteManager : MonoBehaviour
 
 
 
+
         if (levelText != null &&
-           LevelManager.Instance != null)
+            LevelManager.Instance != null)
         {
 
             levelText.text =
@@ -135,7 +127,15 @@ public class LevelCompleteManager : MonoBehaviour
 
 
 
-        UnlockNextLevel();
+        UnlockLevel();
+
+
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance
+                .PlayVictory();
+        }
 
     }
 
@@ -146,8 +146,7 @@ public class LevelCompleteManager : MonoBehaviour
 
 
 
-
-    private void UnlockNextLevel()
+    private void UnlockLevel()
     {
 
         if (LevelManager.Instance == null)
@@ -155,13 +154,17 @@ public class LevelCompleteManager : MonoBehaviour
 
 
 
-        LevelManager.Instance.LevelComplete();
+        int nextLevel =
+            LevelManager.Instance.CurrentLevel + 1;
 
 
 
-        Debug.Log(
-            "Level berhasil diselesaikan"
-        );
+        if (SaveManager.Instance != null)
+        {
+            SaveManager.Instance
+                .UnlockLevel(nextLevel);
+        }
+
 
     }
 
@@ -172,6 +175,10 @@ public class LevelCompleteManager : MonoBehaviour
 
 
 
+
+    // =====================================
+    // BUTTON NEXT LEVEL
+    // =====================================
 
     public void NextLevel()
     {
@@ -181,42 +188,50 @@ public class LevelCompleteManager : MonoBehaviour
 
 
 
-        int nextLevel =
-            LevelManager.Instance.CurrentLevel;
+        int next =
+            LevelManager.Instance.CurrentLevelIndex + 1;
 
 
 
-        if (nextLevel > 5)
+        // selesai semua level
+
+        if (next >= 5)
         {
 
             Debug.Log(
-                "Semua level selesai"
+                "Semua level selesai!"
             );
 
 
-            ReturnToMenu();
+            ReturnMenu();
 
             return;
-
         }
 
+
+
+
+
+
+        string sceneName =
+            "Level"
+            +
+            (next + 1);
 
 
 
         if (SceneLoader.Instance != null)
         {
 
-            SceneLoader.Instance.LoadScene(
-                "Level" + nextLevel
-            );
+            SceneLoader.Instance
+                .LoadScene(sceneName);
 
         }
         else
         {
 
             SceneManager.LoadScene(
-                "Level" + nextLevel
-            );
+                sceneName);
 
         }
 
@@ -229,24 +244,31 @@ public class LevelCompleteManager : MonoBehaviour
 
 
 
+    // =====================================
+    // RETRY
+    // =====================================
 
     public void RetryLevel()
     {
 
+        string currentScene =
+            SceneManager.GetActiveScene()
+            .name;
+
+
+
         if (SceneLoader.Instance != null)
         {
 
-            SceneLoader.Instance.LoadScene(
-                SceneManager.GetActiveScene().name
-            );
+            SceneLoader.Instance
+                .LoadScene(currentScene);
 
         }
         else
         {
 
             SceneManager.LoadScene(
-                SceneManager.GetActiveScene().name
-            );
+                currentScene);
 
         }
 
@@ -259,16 +281,20 @@ public class LevelCompleteManager : MonoBehaviour
 
 
 
+    // =====================================
+    // MAIN MENU
+    // =====================================
 
-    public void ReturnToMenu()
+    public void ReturnMenu()
     {
 
         if (SceneLoader.Instance != null)
         {
 
-            SceneLoader.Instance.LoadScene(
-                "MainMenu"
-            );
+            SceneLoader.Instance
+                .LoadScene(
+                    "MainMenu"
+                );
 
         }
         else
@@ -281,5 +307,6 @@ public class LevelCompleteManager : MonoBehaviour
         }
 
     }
+
 
 }

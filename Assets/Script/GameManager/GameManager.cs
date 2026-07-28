@@ -2,20 +2,13 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 
-
 public class GameManager : MonoBehaviour
 {
 
     public static GameManager Instance { get; private set; }
 
 
-
     public bool IsGameFinished { get; private set; }
-
-
-
-
-
 
 
 
@@ -23,7 +16,7 @@ public class GameManager : MonoBehaviour
     {
 
         if (Instance != null &&
-           Instance != this)
+            Instance != this)
         {
             Destroy(gameObject);
             return;
@@ -33,8 +26,6 @@ public class GameManager : MonoBehaviour
         Instance = this;
 
     }
-
-
 
 
 
@@ -53,7 +44,6 @@ public class GameManager : MonoBehaviour
             return;
 
 
-
         IsGameFinished = true;
 
 
@@ -66,19 +56,17 @@ public class GameManager : MonoBehaviour
 
         if (TurnManager.Instance != null)
         {
-            TurnManager.Instance
-                .EndGame();
+            TurnManager.Instance.EndGame();
         }
 
 
 
-        if (LevelCompleteManager.Instance != null)
-        {
-
-            LevelCompleteManager.Instance
-                .LevelComplete();
-
-        }
+        /*
+         Jangan panggil LevelCompleteManager disini.
+         
+         BossHealth yang menangani
+         Victory Panel.
+        */
 
     }
 
@@ -114,18 +102,14 @@ public class GameManager : MonoBehaviour
 
         if (TurnManager.Instance != null)
         {
-            TurnManager.Instance
-                .EndGame();
+            TurnManager.Instance.EndGame();
         }
 
 
 
         if (DefeatScreenManager.Instance != null)
         {
-
-            DefeatScreenManager.Instance
-                .ShowDefeat();
-
+            DefeatScreenManager.Instance.ShowDefeat();
         }
 
     }

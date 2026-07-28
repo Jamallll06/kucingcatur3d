@@ -16,7 +16,7 @@ public class LevelSelectManager : MonoBehaviour
 
 
 
-    [Header("Locked UI")]
+    [Header("Lock Icon")]
     [SerializeField]
     private GameObject[] lockIcons;
 
@@ -24,23 +24,14 @@ public class LevelSelectManager : MonoBehaviour
 
     [Header("Scene")]
     [SerializeField]
-    private string levelScenePrefix = "Level";
-
-
-
-    private int unlockedLevel;
-
-
-
-
+    private string levelPrefix = "Level";
 
 
 
     private void Awake()
     {
-
         if (Instance != null &&
-           Instance != this)
+            Instance != this)
         {
             Destroy(gameObject);
             return;
@@ -48,25 +39,14 @@ public class LevelSelectManager : MonoBehaviour
 
 
         Instance = this;
-
     }
-
-
-
-
-
 
 
 
 
     private void Start()
     {
-
-        LoadUnlockedLevel();
-
-
         SetupButtons();
-
     }
 
 
@@ -75,54 +55,43 @@ public class LevelSelectManager : MonoBehaviour
 
 
 
-
-
-    private void LoadUnlockedLevel()
-    {
-
-        /*
-         PlayerPrefs:
-         
-         1 = Level 1 terbuka
-         2 = Level 2 terbuka
-         3 = Level 3 terbuka
-         dst
-        */
-
-
-        unlockedLevel =
-            PlayerPrefs.GetInt(
-                "UNLOCK_LEVEL",
-                1
-            );
-
-
-        Debug.Log(
-            "Unlocked Level : "
-            + unlockedLevel
-        );
-
-    }
-
-
-
-
-
-
-
-
+    // ======================================
+    // SETUP BUTTON
+    // ======================================
 
     private void SetupButtons()
     {
 
+        int unlockedLevel = 1;
+
+
+        if (SaveManager.Instance != null)
+        {
+            unlockedLevel =
+                SaveManager.Instance
+                .GetUnlockedLevel();
+        }
+
+
+
+
         for (int i = 0;
-            i < levelButtons.Length;
-            i++)
+             i < levelButtons.Length;
+             i++)
         {
 
+            int levelNumber = i + 1;
 
-            int levelNumber =
-                i + 1;
+
+
+            if (levelButtons[i] == null)
+            {
+                Debug.LogError(
+                    $"Level Button {i} belum diassign!"
+                );
+
+                continue;
+            }
 
 
 
@@ -131,44 +100,108 @@ public class LevelSelectManager : MonoBehaviour
 
 
 
-            levelButtons[i]
-                .interactable =
+            levelButtons[i].interactable =
                 unlocked;
 
 
 
+            int index = i;
+
+
+
+            levelButtons[i]
+                .onClick
+                .RemoveAllListeners();
+
+
+
+            levelButtons[i]
+                .onClick
+                .AddListener(() =>
+                {
+                    SelectLevel(index);
+                });
+
+
+
+
+
+            // LOCK ICON
+
             if (lockIcons != null &&
-               i < lockIcons.Length)
+                i < lockIcons.Length &&
+                lockIcons[i] != null)
             {
 
                 lockIcons[i]
-                    .SetActive(
-                        !unlocked
-                    );
+                    .SetActive(!unlocked);
 
             }
 
+        }
 
 
-            if (unlocked)
+    }
+
+
+
+
+
+
+
+
+    // ======================================
+    // SELECT LEVEL
+    // ======================================
+
+    public void SelectLevel(int index)
+    {
+
+        if (SaveManager.Instance != null)
+        {
+
+            int level =
+                index + 1;
+
+
+            if (!SaveManager.Instance
+                .IsLevelUnlocked(level))
             {
 
-                levelButtons[i]
-                    .onClick
-                    .RemoveAllListeners();
+                Debug.Log(
+                    "Level masih terkunci"
+                );
+
+                return;
+            }
+
+        }
 
 
 
-                levelButtons[i]
-                    .onClick
-                    .AddListener(
-                        () =>
-                        {
-                            PlayLevel(
-                                levelNumber
-                            );
-                        }
-                    );
+
+        if (LevelManager.Instance != null)
+        {
+
+            LevelManager.Instance
+                .StartLevel(index);
+
+        }
+        else
+        {
+
+            string sceneName =
+                levelPrefix
+                +
+                (index + 1);
+
+
+
+            if (SceneLoader.Instance != null)
+            {
+
+                SceneLoader.Instance
+                    .LoadScene(sceneName);
 
             }
 
@@ -184,53 +217,47 @@ public class LevelSelectManager : MonoBehaviour
 
 
 
-    public void PlayLevel(
-        int levelNumber
-    )
+    // ======================================
+    // REFRESH UI
+    // ======================================
+
+    public void Refresh()
     {
+        SetupButtons();
+    }
+
+
+
+
+
+
+
+
+    // ======================================
+    // RESET SAVE
+    // ======================================
+
+    public void ResetProgress()
+    {
+
+        if (SaveManager.Instance != null)
+        {
+
+            SaveManager.Instance
+                .ResetSave();
+
+        }
+
+
+        SetupButtons();
+
 
         Debug.Log(
-            "Start Level "
-            + levelNumber
+            "Progress berhasil reset"
         );
 
-
-
-        if (SceneLoader.Instance != null)
-        {
-
-            SceneLoader.Instance
-                .LoadScene(
-                    levelScenePrefix
-                    +
-                    levelNumber
-                );
-
-        }
-
     }
 
 
-
-
-
-
-
-
-
-    public void Back()
-    {
-
-        if (SceneLoader.Instance != null)
-        {
-
-            SceneLoader.Instance
-                .LoadScene(
-                    "MainMenu"
-                );
-
-        }
-
-    }
 
 }

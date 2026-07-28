@@ -1,15 +1,20 @@
 using UnityEngine;
 
+
 public class BossHealth : MonoBehaviour
 {
+
     [Header("Health")]
     [SerializeField]
     private int maxHealth = 20;
 
 
+
     public int MaxHealth => maxHealth;
 
+
     public int CurrentHealth { get; private set; }
+
 
     public bool IsDefeated { get; private set; }
 
@@ -19,37 +24,53 @@ public class BossHealth : MonoBehaviour
 
 
 
+
     private void Awake()
     {
+
         CurrentHealth = maxHealth;
+
 
         abilityManager =
             GetComponent<BossAbilityManager>();
+
     }
+
+
 
 
 
 
     public void SetHealth(int value)
     {
+
         maxHealth = value;
 
+
         CurrentHealth = value;
+
 
         IsDefeated = false;
 
 
+
         Debug.Log(
-            "Boss HP Set : " +
-            CurrentHealth
+            "Boss HP Set : "
+            + CurrentHealth
         );
+
     }
+
+
+
+
 
 
 
 
     public void TakeDamage(int damage)
     {
+
         if (IsDefeated)
             return;
 
@@ -58,26 +79,47 @@ public class BossHealth : MonoBehaviour
         CurrentHealth -= damage;
 
 
+
+        CurrentHealth =
+            Mathf.Max(
+                CurrentHealth,
+                0
+            );
+
+
+
         Debug.Log(
-            $"Boss menerima {damage} damage " +
-            $"HP : {CurrentHealth}/{MaxHealth}"
+            $"Boss Damage {damage} | HP {CurrentHealth}/{MaxHealth}"
         );
 
 
 
+
+
+        // CHECK BOSS ABILITY
+
         if (abilityManager != null)
         {
+
             abilityManager.CheckAbility();
+
         }
+
+
 
 
 
         if (CurrentHealth <= 0)
         {
+
             Defeat();
+
         }
 
     }
+
+
+
 
 
 
@@ -85,39 +127,70 @@ public class BossHealth : MonoBehaviour
 
     private void Defeat()
     {
+
+        if (IsDefeated)
+            return;
+
+
+
         IsDefeated = true;
 
 
+
         Debug.Log(
-            "BOSS KALAH"
+            "===== BOSS KALAH ====="
         );
+
+
 
 
 
         BossAI ai =
             GetComponent<BossAI>();
 
+
         if (ai != null)
             ai.enabled = false;
 
 
 
-        BossLevelComplete complete =
-            GetComponent<BossLevelComplete>();
-
-
-        if (complete != null)
-            complete.BossDefeated();
 
 
 
-        if (GameManager.Instance != null)
+
+        // ==========================
+        // LEVEL COMPLETE SYSTEM
+        // ==========================
+
+        if (LevelCompleteManager.Instance != null)
         {
-            GameManager.Instance.Victory();
+
+            LevelCompleteManager.Instance
+                .CompleteLevel();
+
         }
 
 
 
+        // ==========================
+        // GAME MANAGER OPTIONAL
+        // ==========================
+
+        if (GameManager.Instance != null)
+        {
+
+            GameManager.Instance
+                .Victory();
+
+        }
+
+
+
+
+
+
         gameObject.SetActive(false);
+
     }
+
 }

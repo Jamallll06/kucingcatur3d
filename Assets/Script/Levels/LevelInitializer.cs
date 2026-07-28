@@ -3,45 +3,52 @@ using UnityEngine;
 
 public class LevelInitializer : MonoBehaviour
 {
+    public static LevelInitializer Instance { get; private set; }
 
-    public static LevelInitializer Instance;
+
+    private bool initialized;
 
 
 
     private void Awake()
     {
-
-        Instance = this;
-
-
-        ApplyLevelData();
-
-        if (AudioManager.Instance != null)
+        if (Instance != null &&
+            Instance != this)
         {
-            AudioManager.Instance.PlayBattleMusic();
+            Destroy(gameObject);
+            return;
         }
 
+
+        Instance = this;
+    }
+
+
+
+    private void Start()
+    {
+        InitializeLevel();
     }
 
 
 
 
 
-
-
-    private void ApplyLevelData()
+    public void InitializeLevel()
     {
+        if (initialized)
+            return;
+
+
 
         if (LevelManager.Instance == null)
         {
             Debug.LogError(
-                "LevelManager tidak ditemukan"
+                "LevelInitializer : LevelManager tidak ditemukan!"
             );
 
             return;
         }
-
-
 
 
 
@@ -53,7 +60,7 @@ public class LevelInitializer : MonoBehaviour
         if (data == null)
         {
             Debug.LogError(
-                "LevelData kosong"
+                "LevelInitializer : LevelData kosong!"
             );
 
             return;
@@ -61,23 +68,26 @@ public class LevelInitializer : MonoBehaviour
 
 
 
+        Debug.Log(
+            "Loading Level : "
+            + data.levelName
+        );
 
 
-        // GRID DULU
+
         SetupGrid(data);
 
 
-
-        // BOSS SETELAH GRID
         SetupBoss(data);
+
+
+        initialized = true;
 
 
 
         Debug.Log(
-            "Level Loaded : "
-            + data.levelName
+            "Level berhasil diinisialisasi"
         );
-
     }
 
 
@@ -86,20 +96,21 @@ public class LevelInitializer : MonoBehaviour
 
 
 
+    // ============================
+    // GRID SETUP
+    // ============================
 
-    private void SetupGrid(
-        LevelData data)
+    private void SetupGrid(LevelData data)
     {
 
         GridManager grid =
             FindFirstObjectByType<GridManager>();
 
 
-
         if (grid == null)
         {
             Debug.LogError(
-                "GridManager tidak ditemukan"
+                "GridManager tidak ditemukan!"
             );
 
             return;
@@ -112,6 +123,12 @@ public class LevelInitializer : MonoBehaviour
             data.gridHeight
         );
 
+
+
+        Debug.Log(
+            $"Grid Setup {data.gridWidth}x{data.gridHeight}"
+        );
+
     }
 
 
@@ -121,18 +138,36 @@ public class LevelInitializer : MonoBehaviour
 
 
 
-    private void SetupBoss(
-        LevelData data)
+    // ============================
+    // BOSS SETUP
+    // ============================
+
+    private void SetupBoss(LevelData data)
     {
 
         BossHealth boss =
             FindFirstObjectByType<BossHealth>();
 
 
+
         if (boss != null)
+        {
+
             boss.SetHealth(
                 data.bossHP
             );
+
+
+            Debug.Log(
+                "Boss HP : "
+                + data.bossHP
+            );
+
+        }
+
+
+
+
 
 
 
@@ -141,10 +176,25 @@ public class LevelInitializer : MonoBehaviour
             FindFirstObjectByType<BossAI>();
 
 
+
         if (ai != null)
+        {
+
             ai.SetAccuracy(
                 data.accuracy
             );
+
+
+            Debug.Log(
+                "Boss Accuracy : "
+                + data.accuracy
+            );
+
+        }
+
+
+
+
 
 
 
@@ -154,10 +204,20 @@ public class LevelInitializer : MonoBehaviour
             FindFirstObjectByType<BossAbilityManager>();
 
 
+
         if (ability != null)
+        {
+
             ability.ApplyLevelData(
                 data
             );
+
+
+            Debug.Log(
+                "Boss Ability Loaded"
+            );
+
+        }
 
     }
 

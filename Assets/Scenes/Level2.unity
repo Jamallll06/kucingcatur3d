@@ -174,6 +174,9 @@ MonoBehaviour:
   energyText: {fileID: 0}
   formText: {fileID: 0}
   turnText: {fileID: 0}
+  levelText: {fileID: 0}
+  bossNameText: {fileID: 0}
+  smoothSpeed: 8
 --- !u!114 &62525553
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -837,7 +840,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fbed9227cfc3af14892f38f5e1b02c72, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelInitializer
-  levelData: {fileID: 11400000, guid: ebc0fb504eef2834a8faafe0d3379c86, type: 2}
 --- !u!1 &966827187
 GameObject:
   m_ObjectHideFlags: 0
@@ -1076,6 +1078,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TurnManager
   bossAI: {fileID: 2061394946}
+  bossAbility: {fileID: 0}
   bossTurnDelay: 0.5
 --- !u!1 &1296222357
 GameObject:
@@ -1276,56 +1279,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1378424181}
   m_CullTransparentMesh: 1
---- !u!1 &1400309889
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1400309891}
-  - component: {fileID: 1400309890}
-  m_Layer: 0
-  m_Name: LevelManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1400309890
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1400309889}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 865fa7a4a43e024478b2258b2a9049f9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LevelManager
-  levels:
-  - {fileID: 11400000, guid: ebc0fb504eef2834a8faafe0d3379c86, type: 2}
-  - {fileID: 11400000, guid: 323e545e44ede6748930f89496d92b29, type: 2}
-  - {fileID: 11400000, guid: 341327116c7a4864db0b73c7e4115507, type: 2}
-  - {fileID: 11400000, guid: 3e834f6be7ab9724db04c1e28124eb48, type: 2}
-  - {fileID: 11400000, guid: 3c1873c24da9fb345b5e3925cba1ca32, type: 2}
---- !u!4 &1400309891
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1400309889}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -4.69253, y: -0.5, z: 0.22806978}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1491487599
 GameObject:
   m_ObjectHideFlags: 0
@@ -1856,6 +1809,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AudioManager
   musicSource: {fileID: 1012726987}
   sfxSource: {fileID: 1955740697}
+  menuMusic: {fileID: 0}
   battleMusic: {fileID: 0}
   moveSfx: {fileID: 0}
   hitSfx: {fileID: 0}
@@ -2045,8 +1999,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f48b57e346f88544b2e8a716a198664, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  victoryPanel: {fileID: 0}
-  gameOverPanel: {fileID: 0}
 --- !u!1 &1955740695
 GameObject:
   m_ObjectHideFlags: 0
@@ -2235,7 +2187,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1d06e8671699d94eb6e2a743e06d32f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossBarrierAbility
-  barrierPrefab: {fileID: 3292098224301655772, guid: 4c72e9aa51d0dd84a9a816ae87e76a8c, type: 3}
+  barrierPrefab: {fileID: 0}
   barrierCount: 3
   barrierDuration: 3
 --- !u!114 &2061394948
@@ -2255,6 +2207,7 @@ MonoBehaviour:
   useSummon: 0
   useRage: 0
   abilityHealthPercent: 0.5
+  abilityCooldown: 2
 --- !u!114 &2061394949
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2691,7 +2644,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 514359887}
   - {fileID: 966827188}
-  - {fileID: 1400309891}
   - {fileID: 1541315687}
   - {fileID: 1023296977}
   - {fileID: 2061394954}

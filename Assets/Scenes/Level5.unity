@@ -344,7 +344,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1d06e8671699d94eb6e2a743e06d32f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossBarrierAbility
-  barrierPrefab: {fileID: 3292098224301655772, guid: 4c72e9aa51d0dd84a9a816ae87e76a8c, type: 3}
+  barrierPrefab: {fileID: 0}
   barrierCount: 3
   barrierDuration: 3
 --- !u!114 &67223085
@@ -364,6 +364,7 @@ MonoBehaviour:
   useSummon: 0
   useRage: 0
   abilityHealthPercent: 0.5
+  abilityCooldown: 2
 --- !u!114 &67223086
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -636,6 +637,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TurnManager
   bossAI: {fileID: 67223083}
+  bossAbility: {fileID: 0}
   bossTurnDelay: 0.5
 --- !u!1 &149791308
 GameObject:
@@ -1021,6 +1023,9 @@ MonoBehaviour:
   energyText: {fileID: 0}
   formText: {fileID: 0}
   turnText: {fileID: 0}
+  levelText: {fileID: 0}
+  bossNameText: {fileID: 0}
+  smoothSpeed: 8
 --- !u!114 &642775125
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1231,7 +1236,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fbed9227cfc3af14892f38f5e1b02c72, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelInitializer
-  levelData: {fileID: 11400000, guid: ebc0fb504eef2834a8faafe0d3379c86, type: 2}
 --- !u!1 &924564734
 GameObject:
   m_ObjectHideFlags: 0
@@ -1555,6 +1559,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AudioManager
   musicSource: {fileID: 1488645022}
   sfxSource: {fileID: 1773003779}
+  menuMusic: {fileID: 0}
   battleMusic: {fileID: 0}
   moveSfx: {fileID: 0}
   hitSfx: {fileID: 0}
@@ -1657,56 +1662,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3366789514749597965, guid: ecd613edc1f1c794486918f01619bb6c, type: 3}
   m_PrefabInstance: {fileID: 1119157430}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1119681953
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1119681955}
-  - component: {fileID: 1119681954}
-  m_Layer: 0
-  m_Name: LevelManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1119681954
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1119681953}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 865fa7a4a43e024478b2258b2a9049f9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LevelManager
-  levels:
-  - {fileID: 11400000, guid: ebc0fb504eef2834a8faafe0d3379c86, type: 2}
-  - {fileID: 11400000, guid: 323e545e44ede6748930f89496d92b29, type: 2}
-  - {fileID: 11400000, guid: 341327116c7a4864db0b73c7e4115507, type: 2}
-  - {fileID: 11400000, guid: 3e834f6be7ab9724db04c1e28124eb48, type: 2}
-  - {fileID: 11400000, guid: 3c1873c24da9fb345b5e3925cba1ca32, type: 2}
---- !u!4 &1119681955
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1119681953}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -4.69253, y: -0.5, z: 0.22806978}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1120023381
 GameObject:
   m_ObjectHideFlags: 0
@@ -1751,8 +1706,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f48b57e346f88544b2e8a716a198664, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  victoryPanel: {fileID: 0}
-  gameOverPanel: {fileID: 0}
 --- !u!1 &1266535280
 GameObject:
   m_ObjectHideFlags: 0
@@ -2692,7 +2645,6 @@ SceneRoots:
   - {fileID: 553833364}
   - {fileID: 67223091}
   - {fileID: 924564738}
-  - {fileID: 1119681955}
   - {fileID: 1339957723}
   - {fileID: 97387412}
   - {fileID: 985847165}

@@ -8,24 +8,11 @@ public class SaveManager : MonoBehaviour
 
 
 
-    // ==========================
-    // SAVE KEY
-    // ==========================
+    private const string CURRENT_LEVEL = "CURRENT_LEVEL";
+    private const string UNLOCK_LEVEL = "UNLOCK_LEVEL";
 
-    private const string UNLOCK_LEVEL =
-        "UNLOCK_LEVEL";
-
-
-    private const string CURRENT_LEVEL =
-        "CURRENT_LEVEL";
-
-
-    private const string BGM_VOLUME =
-        "BGM_VOLUME";
-
-
-    private const string SFX_VOLUME =
-        "SFX_VOLUME";
+    private const string BGM_VOLUME = "BGM_VOLUME";
+    private const string SFX_VOLUME = "SFX_VOLUME";
 
 
 
@@ -54,10 +41,39 @@ public class SaveManager : MonoBehaviour
 
 
 
+    // =========================
+    // LEVEL
+    // =========================
 
-    // ==========================
-    // LEVEL SYSTEM
-    // ==========================
+
+    public void SaveCurrentLevel(int level)
+    {
+
+        PlayerPrefs.SetInt(
+            CURRENT_LEVEL,
+            level
+        );
+
+        PlayerPrefs.Save();
+
+    }
+
+
+
+    public int GetCurrentLevel()
+    {
+
+        return PlayerPrefs.GetInt(
+            CURRENT_LEVEL,
+            0
+        );
+
+    }
+
+
+
+
+
 
 
     public void UnlockLevel(int level)
@@ -79,17 +95,9 @@ public class SaveManager : MonoBehaviour
 
             PlayerPrefs.Save();
 
-
-            Debug.Log(
-                "Unlock Level : "
-                + level
-            );
-
         }
 
     }
-
-
 
 
 
@@ -111,18 +119,10 @@ public class SaveManager : MonoBehaviour
 
 
 
-
-
-    public void SaveCurrentLevel(int level)
+    public bool IsLevelUnlocked(int level)
     {
 
-        PlayerPrefs.SetInt(
-            CURRENT_LEVEL,
-            level
-        );
-
-
-        PlayerPrefs.Save();
+        return level <= GetUnlockedLevel();
 
     }
 
@@ -133,27 +133,9 @@ public class SaveManager : MonoBehaviour
 
 
 
-    public int GetCurrentLevel()
-    {
-
-        return PlayerPrefs.GetInt(
-            CURRENT_LEVEL,
-            1
-        );
-
-    }
-
-
-
-
-
-
-
-
-
-    // ==========================
-    // AUDIO SYSTEM
-    // ==========================
+    // =========================
+    // AUDIO SAVE
+    // =========================
 
 
     public void SaveBGMVolume(float value)
@@ -167,9 +149,13 @@ public class SaveManager : MonoBehaviour
 
         PlayerPrefs.Save();
 
+
+        Debug.Log(
+            "Save BGM : "
+            + value
+        );
+
     }
-
-
 
 
 
@@ -191,8 +177,6 @@ public class SaveManager : MonoBehaviour
 
 
 
-
-
     public void SaveSFXVolume(float value)
     {
 
@@ -204,9 +188,13 @@ public class SaveManager : MonoBehaviour
 
         PlayerPrefs.Save();
 
+
+        Debug.Log(
+            "Save SFX : "
+            + value
+        );
+
     }
-
-
 
 
 
@@ -230,53 +218,47 @@ public class SaveManager : MonoBehaviour
 
 
 
-    // ==========================
-    // RESET DATA
-    // ==========================
+    // =========================
+    // RESET
+    // =========================
 
+
+    public void ResetSave()
+    {
+
+        PlayerPrefs.DeleteAll();
+
+        PlayerPrefs.Save();
+
+
+        Debug.Log(
+            "SAVE RESET"
+        );
+
+    }
+
+    // =========================
+    // RESET PROGRESS ONLY
+    // =========================
 
     public void ResetProgress()
     {
-
-        PlayerPrefs.DeleteKey(
-            UNLOCK_LEVEL
-        );
-
 
         PlayerPrefs.DeleteKey(
             CURRENT_LEVEL
         );
 
 
-        PlayerPrefs.Save();
-
-
-
-        Debug.Log(
-            "Progress berhasil direset"
+        PlayerPrefs.DeleteKey(
+            UNLOCK_LEVEL
         );
 
-    }
-
-
-
-
-
-
-
-
-    public void ResetAllData()
-    {
-
-        PlayerPrefs.DeleteAll();
-
 
         PlayerPrefs.Save();
 
 
-
         Debug.Log(
-            "Semua data dihapus"
+            "LEVEL PROGRESS RESET"
         );
 
     }

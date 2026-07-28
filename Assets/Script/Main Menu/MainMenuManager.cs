@@ -12,25 +12,17 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField]
     private GameObject mainPanel;
 
-
     [SerializeField]
     private GameObject levelPanel;
-
 
     [SerializeField]
     private GameObject settingsPanel;
 
-
     [SerializeField]
     private GameObject creditsPanel;
 
-
-
-    private GameObject currentPanel;
-
-
-
-
+    [SerializeField]
+    private GameObject loadingPanel;
 
 
 
@@ -38,7 +30,7 @@ public class MainMenuManager : MonoBehaviour
     {
 
         if (Instance != null &&
-           Instance != this)
+            Instance != this)
         {
             Destroy(gameObject);
             return;
@@ -54,18 +46,11 @@ public class MainMenuManager : MonoBehaviour
 
 
 
-
-
-
     private void Start()
     {
+
         ShowMain();
 
-
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlayMenuMusic();
-        }
     }
 
 
@@ -75,158 +60,262 @@ public class MainMenuManager : MonoBehaviour
 
 
 
-
-    private void DisableAll()
-    {
-
-        if (mainPanel != null)
-            mainPanel.SetActive(false);
-
-
-        if (levelPanel != null)
-            levelPanel.SetActive(false);
-
-
-        if (settingsPanel != null)
-            settingsPanel.SetActive(false);
-
-
-        if (creditsPanel != null)
-            creditsPanel.SetActive(false);
-
-    }
-
-
-
-
-
-
-
-
+    // ============================
+    // SHOW MAIN PANEL
+    // ============================
 
     public void ShowMain()
     {
 
-        DisableAll();
-
-
-        if (mainPanel != null)
-            mainPanel.SetActive(true);
-
-
-        currentPanel =
-            mainPanel;
-
-
-    }
-
-
-
-
-
-
-
-
-
-    public void ShowLevelSelect()
-    {
-
-        DisableAll();
-
-
-        if (levelPanel != null)
-            levelPanel.SetActive(true);
-
-
-        currentPanel =
-            levelPanel;
-
-
-    }
-
-
-
-
-
-
-
-
-
-    public void ShowSettings()
-    {
-
-        DisableAll();
-
-
-        if (settingsPanel != null)
-            settingsPanel.SetActive(true);
-
-
-        currentPanel =
-            settingsPanel;
-
-    }
-
-
-
-
-
-
-
-
-
-    public void ShowCredits()
-    {
-
-        DisableAll();
-
-
-        if (creditsPanel != null)
-            creditsPanel.SetActive(true);
-
-
-        currentPanel =
-            creditsPanel;
-
-    }
-
-
-
-
-
-
-
-
-
-    public void BackToMain()
-    {
-
-        ShowMain();
-
-    }
-
-
-
-
-
-
-
-
-
-    public void PlayGame()
-    {
-
-        Debug.Log(
-            "Start Game"
+        SetPanel(
+            true,
+            false,
+            false,
+            false
         );
 
 
 
-        if (MenuAudioManager.Instance != null)
+        if (loadingPanel != null)
+            loadingPanel.SetActive(false);
+
+    }
+
+
+
+
+
+
+
+
+
+    // ============================
+    // LEVEL SELECT
+    // ============================
+
+    public void ShowLevelSelect()
+    {
+
+        SetPanel(
+            false,
+            true,
+            false,
+            false
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ============================
+    // SETTINGS
+    // ============================
+
+    public void ShowSettings()
+    {
+
+        SetPanel(
+            false,
+            false,
+            true,
+            false
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    // ============================
+    // CREDIT
+    // ============================
+
+    public void ShowCredits()
+    {
+
+        SetPanel(
+            false,
+            false,
+            false,
+            true
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    private void SetPanel(
+        bool main,
+        bool level,
+        bool settings,
+        bool credits)
+    {
+
+
+        if (mainPanel != null)
+            mainPanel.SetActive(main);
+
+
+        if (levelPanel != null)
+            levelPanel.SetActive(level);
+
+
+        if (settingsPanel != null)
+            settingsPanel.SetActive(settings);
+
+
+        if (creditsPanel != null)
+            creditsPanel.SetActive(credits);
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+    // ============================
+    // CONTINUE GAME
+    // ============================
+
+    public void ContinueGame()
+    {
+
+        int level = 0;
+
+
+
+        if (SaveManager.Instance != null)
         {
-            MenuAudioManager.Instance
-                .PlayClick();
+
+            level =
+                SaveManager.Instance
+                .GetCurrentLevel();
+
         }
+        else if (LevelManager.Instance != null)
+        {
+
+            level =
+                LevelManager.Instance
+                .CurrentLevelIndex;
+
+        }
+
+
+
+        LoadLevel(level);
+
+    }
+
+
+
+
+
+
+
+
+
+    // ============================
+    // NEW GAME
+    // ============================
+
+    public void NewGame()
+    {
+
+        if (SaveManager.Instance != null)
+        {
+
+            SaveManager.Instance
+                .ResetSave();
+
+        }
+
+
+        if (LevelManager.Instance != null)
+        {
+
+            LevelManager.Instance
+                .ResetProgress();
+
+        }
+
+
+
+        LoadLevel(0);
+
+    }
+
+
+
+
+
+
+
+
+
+    // ============================
+    // PLAY FIRST LEVEL
+    // ============================
+
+    public void PlayGame()
+    {
+
+        LoadLevel(0);
+
+    }
+
+
+
+
+
+
+
+
+
+    private void LoadLevel(int index)
+    {
+
+        ShowLoading();
+
+
+
+        if (LevelManager.Instance != null)
+        {
+
+            LevelManager.Instance
+                .StartLevel(index);
+
+
+            return;
+
+        }
+
 
 
 
@@ -235,18 +324,12 @@ public class MainMenuManager : MonoBehaviour
 
             SceneLoader.Instance
                 .LoadScene(
-                    "Level1"
+                    "Level"
+                    +
+                    (index + 1)
                 );
 
         }
-        else
-        {
-
-            Debug.LogError(
-                "SceneLoader tidak ditemukan"
-            );
-
-        }
 
     }
 
@@ -258,25 +341,15 @@ public class MainMenuManager : MonoBehaviour
 
 
 
-    public void LoadLevel(
-        int level)
+    // ============================
+    // LOADING
+    // ============================
+
+    private void ShowLoading()
     {
 
-        if (SceneLoader.Instance == null)
-        {
-            Debug.LogError(
-                "SceneLoader tidak ditemukan"
-            );
-
-            return;
-        }
-
-
-
-        SceneLoader.Instance
-            .LoadScene(
-                "Level" + level
-            );
+        if (loadingPanel != null)
+            loadingPanel.SetActive(true);
 
     }
 
@@ -287,12 +360,57 @@ public class MainMenuManager : MonoBehaviour
 
 
 
+
+    // ============================
+    // RESET SAVE BUTTON
+    // ============================
+
+    public void ResetSave()
+    {
+
+        if (SaveManager.Instance != null)
+        {
+
+            SaveManager.Instance
+                .ResetSave();
+
+        }
+
+
+
+        if (LevelManager.Instance != null)
+        {
+
+            LevelManager.Instance
+                .ResetProgress();
+
+        }
+
+
+
+        Debug.Log(
+            "SAVE RESET"
+        );
+
+    }
+
+
+
+
+
+
+
+
+
+    // ============================
+    // QUIT
+    // ============================
 
     public void QuitGame()
     {
 
         Debug.Log(
-            "Quit Game"
+            "QUIT GAME"
         );
 
 
@@ -301,9 +419,11 @@ public class MainMenuManager : MonoBehaviour
         UnityEditor.EditorApplication
             .isPlaying = false;
 
+
 #else
 
         Application.Quit();
+
 
 #endif
 

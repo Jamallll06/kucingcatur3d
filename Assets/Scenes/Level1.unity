@@ -1540,8 +1540,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f48b57e346f88544b2e8a716a198664, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  victoryPanel: {fileID: 0}
-  gameOverPanel: {fileID: 0}
 --- !u!1 &805971861
 GameObject:
   m_ObjectHideFlags: 0
@@ -1590,6 +1588,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AudioManager
   musicSource: {fileID: 1767725450}
   sfxSource: {fileID: 1381696366}
+  menuMusic: {fileID: 0}
   battleMusic: {fileID: 0}
   moveSfx: {fileID: 0}
   hitSfx: {fileID: 0}
@@ -1855,6 +1854,9 @@ MonoBehaviour:
   energyText: {fileID: 0}
   formText: {fileID: 0}
   turnText: {fileID: 0}
+  levelText: {fileID: 0}
+  bossNameText: {fileID: 0}
+  smoothSpeed: 8
 --- !u!1 &868651662
 GameObject:
   m_ObjectHideFlags: 0
@@ -2273,11 +2275,11 @@ Transform:
   m_GameObject: {fileID: 1610230916}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.1989901, y: 0, z: 0.7674902}
+  m_LocalPosition: {x: -3.49354, y: -0.5, z: 0.99556}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1695085565}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1610230918
 MonoBehaviour:
@@ -2291,57 +2293,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fbed9227cfc3af14892f38f5e1b02c72, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelInitializer
---- !u!1 &1695085564
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1695085565}
-  - component: {fileID: 1695085566}
-  m_Layer: 0
-  m_Name: LevelManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1695085565
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1695085564}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -4.69253, y: -0.5, z: 0.22806978}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1610230917}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1695085566
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1695085564}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 865fa7a4a43e024478b2258b2a9049f9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LevelManager
-  levels:
-  - {fileID: 11400000, guid: ebc0fb504eef2834a8faafe0d3379c86, type: 2}
-  - {fileID: 11400000, guid: 323e545e44ede6748930f89496d92b29, type: 2}
-  - {fileID: 11400000, guid: 341327116c7a4864db0b73c7e4115507, type: 2}
-  - {fileID: 11400000, guid: 3e834f6be7ab9724db04c1e28124eb48, type: 2}
-  - {fileID: 11400000, guid: 3c1873c24da9fb345b5e3925cba1ca32, type: 2}
 --- !u!1 &1767725448
 GameObject:
   m_ObjectHideFlags: 0
@@ -2666,4 +2617,4 @@ SceneRoots:
   - {fileID: 312295317}
   - {fileID: 1561064949}
   - {fileID: 147468588}
-  - {fileID: 1695085565}
+  - {fileID: 1610230917}

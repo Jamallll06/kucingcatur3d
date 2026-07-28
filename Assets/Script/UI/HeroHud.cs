@@ -13,22 +13,47 @@ public class HeroHUD : MonoBehaviour
     [SerializeField] private TMP_Text energyText;
     [SerializeField] private TMP_Text formText;
     [SerializeField] private TMP_Text turnText;
+    [SerializeField] private TMP_Text levelText;
+    [SerializeField] private TMP_Text bossNameText;
+
+    [Header("Animation")]
+    [SerializeField] private float smoothSpeed = 8f;
 
     private TransformingPiece hero;
+    private BossHealth boss;
+
+    private float currentHP;
+    private float currentEnergy;
 
     private void Start()
     {
         hero = FindFirstObjectByType<TransformingPiece>();
+        boss = FindFirstObjectByType<BossHealth>();
 
         if (hero != null)
         {
             hpSlider.maxValue = hero.MaxHealth;
+            currentHP = hero.CurrentHealth;
         }
 
         if (EnergyManager.Instance != null)
         {
-            energySlider.maxValue =
-                EnergyManager.Instance.MaxEnergy;
+            energySlider.maxValue = EnergyManager.Instance.MaxEnergy;
+            currentEnergy = EnergyManager.Instance.CurrentEnergy;
+        }
+
+        if (LevelManager.Instance != null && levelText != null)
+        {
+            levelText.text =
+                "LEVEL " +
+                LevelManager.Instance.CurrentLevel;
+        }
+
+        if (boss != null &&
+            bossNameText != null)
+        {
+            bossNameText.text =
+                boss.gameObject.name;
         }
     }
 
@@ -37,28 +62,74 @@ public class HeroHUD : MonoBehaviour
         if (hero == null)
             return;
 
-        hpSlider.value = hero.CurrentHealth;
-        hpText.text =
-            $"{hero.CurrentHealth}/{hero.MaxHealth}";
+        UpdateHealth();
 
+        UpdateEnergy();
+
+        UpdateForm();
+
+        UpdateTurn();
+    }
+
+    private void UpdateHealth()
+    {
+        currentHP = Mathf.Lerp(
+            currentHP,
+            hero.CurrentHealth,
+            Time.deltaTime * smoothSpeed);
+
+        hpSlider.value = currentHP;
+
+        hpText.text =
+            hero.CurrentHealth +
+            "/" +
+            hero.MaxHealth;
+    }
+
+    private void UpdateEnergy()
+    {
+        if (EnergyManager.Instance == null)
+            return;
+
+        currentEnergy = Mathf.Lerp(
+            currentEnergy,
+            EnergyManager.Instance.CurrentEnergy,
+            Time.deltaTime * smoothSpeed);
+
+        energySlider.value = currentEnergy;
+
+        energyText.text =
+            EnergyManager.Instance.CurrentEnergy +
+            "/" +
+            EnergyManager.Instance.MaxEnergy;
+    }
+
+    private void UpdateForm()
+    {
         formText.text =
             hero.CurrentForm.ToString();
+    }
 
-        if (EnergyManager.Instance != null)
+    private void UpdateTurn()
+    {
+        if (TurnManager.Instance == null)
+            return;
+
+        if (TurnManager.Instance.IsPlayerTurn)
         {
-            energySlider.value =
-                EnergyManager.Instance.CurrentEnergy;
-
-            energyText.text =
-                $"{EnergyManager.Instance.CurrentEnergy}/{EnergyManager.Instance.MaxEnergy}";
+            turnText.text = "PLAYER TURN";
+            turnText.color = Color.green;
         }
-
-        if (TurnManager.Instance != null)
+        else
         {
-            turnText.text =
-                TurnManager.Instance.IsPlayerTurn
-                    ? "PLAYER TURN"
-                    : "BOSS TURN";
+            turnText.text = "BOSS TURN";
+            turnText.color = Color.red;
         }
+    }
+
+    public void PauseButton()
+    {
+        if (PauseManager.Instance != null)
+            PauseManager.Instance.OpenPause();
     }
 }

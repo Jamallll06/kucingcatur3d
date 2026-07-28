@@ -2,52 +2,32 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using TMPro;
-
 
 
 public class SceneLoader : MonoBehaviour
 {
-
     public static SceneLoader Instance { get; private set; }
 
 
+    [Header("Loading UI")]
+    [SerializeField] private GameObject loadingPanel;
+    [SerializeField] private Slider loadingSlider;
+
 
     [Header("Fade")]
-    [SerializeField]
-    private CanvasGroup fadeCanvas;
+    [SerializeField] private CanvasGroup fadeCanvas;
+    [SerializeField] private float fadeDuration = 0.5f;
 
 
-    [SerializeField]
-    private float fadeDuration = 0.5f;
-
-
-
-    [Header("Loading UI")]
-    [SerializeField]
-    private GameObject loadingPanel;
-
-
-    [SerializeField]
-    private Slider loadingBar;
-
-
-    [SerializeField]
-    private TMP_Text loadingText;
-
-
-
-    [Header("Loading Message")]
-    [SerializeField]
-    private string[] loadingTips;
+    [Header("Settings")]
+    [SerializeField] private bool dontDestroy = true;
 
 
 
     private void Awake()
     {
-
         if (Instance != null &&
-           Instance != this)
+            Instance != this)
         {
             Destroy(gameObject);
             return;
@@ -56,16 +36,18 @@ public class SceneLoader : MonoBehaviour
 
         Instance = this;
 
+
+        if (dontDestroy)
+            DontDestroyOnLoad(gameObject);
     }
-
-
-
-
 
 
 
     private void Start()
     {
+        if (loadingPanel != null)
+            loadingPanel.SetActive(false);
+
 
         if (fadeCanvas != null)
         {
@@ -75,85 +57,62 @@ public class SceneLoader : MonoBehaviour
                 FadeIn()
             );
         }
-
-
-
-        if (loadingPanel != null)
-            loadingPanel.SetActive(false);
-
     }
 
 
 
+    // =====================================
+    // PUBLIC LOAD
+    // =====================================
 
-
-
-
-
-
-    public void LoadScene(
-        string sceneName)
+    public void LoadScene(string sceneName)
     {
+        if (string.IsNullOrEmpty(sceneName))
+        {
+            Debug.LogError(
+                "Scene name kosong!"
+            );
+
+            return;
+        }
+
 
         StartCoroutine(
-            LoadRoutine(sceneName)
+            LoadSceneRoutine(sceneName)
         );
-
     }
 
 
 
+    public void LoadLevel(int level)
+    {
+        string sceneName =
+            "Level" + level;
+
+
+        LoadScene(sceneName);
+    }
 
 
 
+    // =====================================
+    // LOAD ROUTINE
+    // =====================================
 
-
-
-    private IEnumerator LoadRoutine(
+    private IEnumerator LoadSceneRoutine(
         string sceneName)
     {
-
-
-        // =========================
-        // SHOW LOADING
-        // =========================
 
         if (loadingPanel != null)
             loadingPanel.SetActive(true);
 
 
 
-        if (loadingBar != null)
-            loadingBar.value = 0;
+        yield return StartCoroutine(
+            FadeOut()
+        );
 
 
-
-        SetRandomTip();
-
-
-
-        // =========================
-        // AUDIO FADE
-        // =========================
-
-        if (MenuAudioManager.Instance != null)
-        {
-            MenuAudioManager.Instance
-                .FadeOutMusic();
-        }
-
-
-
-
-        yield return FadeOut();
-
-
-
-
-
-        // =========================
-        // LOAD SCENE
-        // =========================
 
         AsyncOperation operation =
             SceneManager.LoadSceneAsync(
@@ -161,11 +120,7 @@ public class SceneLoader : MonoBehaviour
             );
 
 
-
-        operation.allowSceneActivation =
-            false;
-
-
+        operation.allowSceneActivation = false;
 
 
 
@@ -174,33 +129,16 @@ public class SceneLoader : MonoBehaviour
 
             float progress =
                 Mathf.Clamp01(
-                    operation.progress /
-                    0.9f
+                    operation.progress / 0.9f
                 );
 
 
 
-            if (loadingBar != null)
+            if (loadingSlider != null)
             {
-                loadingBar.value =
+                loadingSlider.value =
                     progress;
             }
-
-
-
-            if (loadingText != null)
-            {
-                loadingText.text =
-                    "Loading "
-                    +
-                    Mathf.RoundToInt(
-                        progress * 100
-                    )
-                    +
-                    "%";
-            }
-
-
 
 
 
@@ -208,30 +146,39 @@ public class SceneLoader : MonoBehaviour
             {
 
                 yield return new WaitForSeconds(
-                    0.5f
+                    0.3f
                 );
 
 
                 operation.allowSceneActivation =
                     true;
-
             }
 
 
-
             yield return null;
-
         }
 
+
+
+        yield return null;
+
+
+
+        if (loadingPanel != null)
+            loadingPanel.SetActive(false);
+
+
+
+        yield return StartCoroutine(
+            FadeIn()
+        );
     }
 
 
 
-
-
-
-
-
+    // =====================================
+    // FADE
+    // =====================================
 
     private IEnumerator FadeOut()
     {
@@ -260,19 +207,12 @@ public class SceneLoader : MonoBehaviour
 
 
             yield return null;
-
         }
 
 
 
         fadeCanvas.alpha = 1;
-
     }
-
-
-
-
-
 
 
 
@@ -304,46 +244,11 @@ public class SceneLoader : MonoBehaviour
 
 
             yield return null;
-
         }
 
 
 
         fadeCanvas.alpha = 0;
-
-    }
-
-
-
-
-
-
-
-
-
-    private void SetRandomTip()
-    {
-
-        if (loadingTips == null ||
-           loadingTips.Length == 0)
-            return;
-
-
-
-        int index =
-            Random.Range(
-                0,
-                loadingTips.Length
-            );
-
-
-
-        if (loadingText != null)
-        {
-            loadingText.text =
-                loadingTips[index];
-        }
-
     }
 
 }

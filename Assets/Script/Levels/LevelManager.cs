@@ -1,20 +1,18 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-
 public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance { get; private set; }
 
-
     [Header("Level Database")]
-    [SerializeField]
-    private LevelData[] levels;
-
+    [SerializeField] private LevelData[] levels;
 
     private int currentLevelIndex = 0;
 
+    public int CurrentLevelIndex => currentLevelIndex;
 
+    public int CurrentLevel => currentLevelIndex + 1;
 
     public LevelData CurrentLevelData
     {
@@ -22,132 +20,79 @@ public class LevelManager : MonoBehaviour
         {
             if (levels == null || levels.Length == 0)
             {
-                Debug.LogError(
-                    "LevelManager : LevelData kosong!"
-                );
-
+                Debug.LogError("Level Database kosong.");
                 return null;
             }
 
-
-            if (currentLevelIndex < 0 ||
-                currentLevelIndex >= levels.Length)
-            {
-                Debug.LogError(
-                    "Level index tidak valid : "
-                    + currentLevelIndex
-                );
-
-                return null;
-            }
-
+            currentLevelIndex = Mathf.Clamp(
+                currentLevelIndex,
+                0,
+                levels.Length - 1);
 
             return levels[currentLevelIndex];
         }
     }
 
-
-
-    public int CurrentLevel =>
-        currentLevelIndex + 1;
-
-
-
     private void Awake()
     {
-        if (Instance != null &&
-            Instance != this)
+        if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
 
-
         Instance = this;
-    }
 
-
-
-    private void Start()
-    {
+        DontDestroyOnLoad(gameObject);
 
         LoadProgress();
     }
 
-
-
     private void LoadProgress()
     {
-
-        currentLevelIndex =
-            PlayerPrefs.GetInt(
-                "CURRENT_LEVEL",
-                0
-            );
-
-
-
-        // Anti corrupt save
-
-        if (currentLevelIndex >= levels.Length)
+        if (SaveManager.Instance != null)
         {
-            Debug.LogWarning(
-                "Save level corrupt, reset ke Level 1"
-            );
-
-
-            currentLevelIndex = 0;
-
-
-            SaveProgress();
+            currentLevelIndex =
+                SaveManager.Instance.GetCurrentLevel();
+        }
+        else
+        {
+            currentLevelIndex =
+                PlayerPrefs.GetInt("CURRENT_LEVEL", 0);
         }
 
+        if (levels != null && levels.Length > 0)
+        {
+            currentLevelIndex = Mathf.Clamp(
+                currentLevelIndex,
+                0,
+                levels.Length - 1);
+        }
 
-
-        Debug.Log(
-            "Current Level : "
-            + CurrentLevel
-        );
-
+        Debug.Log($"Current Level : {CurrentLevel}");
     }
-
-
-
 
     public void StartLevel(int index)
     {
-        if (index < 0 ||
-           index >= levels.Length)
-        {
-            Debug.LogWarning(
-                "Level tidak tersedia"
-            );
-
+        if (levels == null || levels.Length == 0)
             return;
-        }
 
+        if (index < 0 || index >= levels.Length)
+            return;
 
         currentLevelIndex = index;
 
         SaveProgress();
 
-        LoadLevelScene();
+        SceneManager.LoadScene(
+            levels[index].levelNumber);
     }
-
-
-
-
 
     public void LevelComplete()
     {
-        Debug.Log(
-            "Level selesai : "
-            + CurrentLevelData.levelName
-        );
-
+        UnlockNextLevel();
 
         currentLevelIndex++;
-
 
         if (currentLevelIndex >= levels.Length)
         {
@@ -155,126 +100,75 @@ public class LevelManager : MonoBehaviour
             return;
         }
 
-
-        UnlockLevel();
-
         SaveProgress();
-
-
-        LoadLevelScene();
     }
 
-
-
-
-    private void LoadLevelScene()
+    private void UnlockNextLevel()
     {
-        LevelData data =
-            CurrentLevelData;
-
-
-        if (data == null)
-            return;
-
-
-
-        Debug.Log(
-            "Loading Scene : "
-            + data.levelNumber
-        );
-
-
-        SceneManager.LoadScene(
-            data.levelNumber
-        );
-    }
-
-
-
-
-
-    private void SaveProgress()
-    {
-        PlayerPrefs.SetInt(
-            "CURRENT_LEVEL",
-            currentLevelIndex
-        );
-
-
-        PlayerPrefs.Save();
-
-
-        Debug.Log(
-            "Progress Saved : "
-            + currentLevelIndex
-        );
-    }
-
-    private void UnlockLevel()
-    {
-
-        int unlock =
-            CurrentLevel + 1;
-
-
-        int saved =
-            PlayerPrefs.GetInt(
-                "UNLOCK_LEVEL",
-                1
-            );
-
-
-        if (unlock > saved)
+        if (SaveManager.Instance != null)
         {
+            SaveManager.Instance.UnlockLevel(CurrentLevel + 1);
+        }
+        else
+        {
+            int unlocked =
+                PlayerPrefs.GetInt("UNLOCK_LEVEL", 1);
 
+            if (CurrentLevel + 1 > unlocked)
+            {
+                PlayerPrefs.SetInt(
+                    "UNLOCK_LEVEL",
+                    CurrentLevel + 1);
+
+                PlayerPrefs.Save();
+            }
+        }
+    }
+
+    public void SaveProgress()
+    {
+        if (SaveManager.Instance != null)
+        {
+            SaveManager.Instance.SaveCurrentLevel(
+                currentLevelIndex);
+        }
+        else
+        {
             PlayerPrefs.SetInt(
-                "UNLOCK_LEVEL",
-                unlock
-            );
-
+                "CURRENT_LEVEL",
+                currentLevelIndex);
 
             PlayerPrefs.Save();
-
-
-            Debug.Log(
-                "Unlock Level "
-                + unlock
-            );
-
         }
-
     }
-
-
-
-
-
-    private void GameComplete()
-    {
-        Debug.Log(
-            "SEMUA LEVEL SELESAI"
-        );
-
-
-        // nanti bisa load ending scene
-    }
-
-
-
-
 
     public void ResetProgress()
     {
-        PlayerPrefs.DeleteKey(
-            "CURRENT_LEVEL"
-        );
-
+        if (SaveManager.Instance != null)
+        {
+            SaveManager.Instance.ResetSave();
+        }
+        else
+        {
+            PlayerPrefs.DeleteKey("CURRENT_LEVEL");
+            PlayerPrefs.DeleteKey("UNLOCK_LEVEL");
+            PlayerPrefs.Save();
+        }
 
         currentLevelIndex = 0;
+    }
 
+    private void GameComplete()
+    {
+        Debug.Log("===== GAME COMPLETE =====");
 
-        Debug.Log(
-            "Progress Reset"
-        );
+        if (SceneLoader.Instance != null)
+        {
+            SceneLoader.Instance.LoadScene("MainMenu");
+        }
+        else
+        {
+            SceneManager.LoadScene("MainMenu");
+        }
     }
 }

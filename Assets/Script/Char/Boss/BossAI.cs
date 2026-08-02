@@ -46,14 +46,21 @@ public class BossAI : MonoBehaviour
     private bool isParryWindowOpen;
     private bool parrySucceeded;
 
-    [Header("Rage")]
     private float damageMultiplier = 1f;
     private float speedMultiplier = 1f;
+    private bool rageActivated;
+    private Animator animator;
 
     private void Start()
     {
         bossHealth = GetComponent<BossHealth>();
         previousPhase = GetCurrentPhase();
+        animator = GetComponent<Animator>();
+
+        if (animator != null)
+        {
+            //animator.SetBool("Move", false);
+        }
     }
 
     private void Update()
@@ -69,28 +76,47 @@ public class BossAI : MonoBehaviour
 
     public IEnumerator ExecuteTurn()
     {
+        if (bossHealth == null)
+            yield break;
+
+        if (bossHealth.IsDefeated)
+            yield break;
+
         int currentPhase = GetCurrentPhase();
 
         if (currentPhase != previousPhase)
         {
             previousPhase = currentPhase;
+
             Debug.Log($"Boss masuk Phase {currentPhase}!");
+
+            HUDManager.Instance?.ShowMessage($"PHASE {currentPhase}");
         }
 
-        int attackCount = currentPhase == 3 ? 2 : 1;
+        // Aktifkan Rage lebih dulu jika sudah Phase 3
+        if (currentPhase == 3)
+        {
+            ActivateRage();
+        }
+
+        // Deklarasikan attackCount SEBELUM dipakai
+        int attackCount = (currentPhase == 3) ? 2 : 1;
 
         for (int i = 0; i < attackCount; i++)
         {
             yield return ExecuteSingleAttack();
 
             if (i < attackCount - 1)
+            {
                 yield return new WaitForSeconds(attackDelayBetweenPatterns);
+            }
         }
     }
 
     private IEnumerator ExecuteSingleAttack()
     {
         ChessPiece targetPiece = FindNearestPiece();
+        LookAtTarget(targetPiece);
 
         if (targetPiece == null)
             yield break;
@@ -107,6 +133,7 @@ public class BossAI : MonoBehaviour
         yield return MoveToAttackPosition(targetCenter);
 
         GridManager.Instance.ShowAttackTelegraph(attackTiles);
+        
 
         parrySucceeded = false;
 
@@ -137,6 +164,10 @@ public class BossAI : MonoBehaviour
         }
         else
         {
+            //animator?.SetTrigger("Attack");
+
+            AudioManager.Instance?.PlayHit();
+
             DamageCharactersOnTiles(attackTiles);
         }
 
@@ -146,6 +177,9 @@ public class BossAI : MonoBehaviour
     private IEnumerator MoveToAttackPosition(Vector2Int targetPosition)
     {
         Tile targetTile = GridManager.Instance.GetTile(targetPosition);
+
+        if (animator != null)
+            //animator.SetBool("Move", true);
 
         if (targetTile == null)
             yield break;
@@ -158,7 +192,7 @@ public class BossAI : MonoBehaviour
 
         while (elapsed < moveDuration)
         {
-            elapsed += Time.deltaTime;
+            elapsed += Time.deltaTime * speedMultiplier;
 
             float progress = Mathf.SmoothStep(
                 0f,
@@ -174,6 +208,9 @@ public class BossAI : MonoBehaviour
 
             yield return null;
         }
+
+        if (animator != null)
+            animator.SetBool("Move", false);
 
         transform.position = endPosition;
     }
@@ -365,7 +402,11 @@ public class BossAI : MonoBehaviour
         foreach (ChessPiece piece in pieces)
         {
             if (attackTiles.Contains(piece.CurrentPosition))
-                piece.TakeDamage(damage);
+                piece.TakeDamage(
+                    Mathf.RoundToInt(
+                        damage * damageMultiplier
+                    )
+                );
         }
     }
 
@@ -409,36 +450,68 @@ public class BossAI : MonoBehaviour
         return (BossAttackPattern)phase3Pattern;
     }
 
-    public void SetAccuracy(float value)
+    public void SetAccuracy(float accuracy)
     {
-        targetAccuracy =
-            Mathf.Clamp01(value);
-
-
-        Debug.Log(
-            "Boss Accuracy berubah : "
-            + targetAccuracy
-        );
+        targetAccuracy = Mathf.Clamp01(accuracy);
     }
 
-    public void SetTelegraph(float duration)
+    public void ApplyLevelData(LevelData data)
     {
-        telegraphDuration = duration;
+        if (data == null)
+            return;
+
+        damage = data.laserDamage;
+
+        targetAccuracy = data.accuracy;
+
+        telegraphDuration = data.laserWarningTime;
+    }
+
+    private void ActivateRage()
+    {
+        if (rageActivated)
+            return;
+
+        rageActivated = true;
+
+        damageMultiplier = 2f;
+        speedMultiplier = 1.4f;
+
+        HUDManager.Instance?.ShowMessage("ENRAGED");
+    }
+
+    public IEnumerator BossTurn()
+    {
+        yield return ExecuteTurn();
+    }
+
+    private void LookAtTarget(ChessPiece target)
+    {
+        if (target == null)
+            return;
+
+        Vector3 dir =
+            target.transform.position -
+            transform.position;
+
+        dir.y = 0;
+
+        if (dir.sqrMagnitude > 0.01f)
+        {
+            transform.rotation =
+                Quaternion.LookRotation(dir);
+        }
     }
 
     public void ApplyRage(
     float damage,
-    float speed
-    )
+    float speed)
     {
         damageMultiplier = damage;
-
         speedMultiplier = speed;
 
+        rageActivated = true;
 
-        Debug.Log(
-            "Boss mendapatkan Rage Buff"
-        );
+        HUDManager.Instance?.ShowMessage("ENRAGED");
     }
-
 }

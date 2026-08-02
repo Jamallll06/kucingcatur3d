@@ -164,10 +164,14 @@ public class BossHealth : MonoBehaviour
 
         if (LevelCompleteManager.Instance != null)
         {
-
             LevelCompleteManager.Instance
-                .CompleteLevel();
+            .CompleteLevel();
+        }
 
+
+        if (ResultPanel.Instance != null)
+        {
+            ResultPanel.Instance.ShowWin();
         }
 
 

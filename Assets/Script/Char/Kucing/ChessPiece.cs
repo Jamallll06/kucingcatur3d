@@ -206,7 +206,6 @@ public abstract class ChessPiece : MonoBehaviour
 
     public virtual void TakeDamage(int damage)
     {
-
         health -= damage;
 
 
@@ -220,6 +219,10 @@ public abstract class ChessPiece : MonoBehaviour
                 0.15f,
                 0.12f
             );
+
+
+
+        health = Mathf.Max(health, 0);
 
 
 
@@ -249,12 +252,30 @@ public abstract class ChessPiece : MonoBehaviour
         );
 
 
-        gameObject.SetActive(false);
+
+        // =========================
+        // LOSS PANEL
+        // =========================
+
+        if (ResultPanel.Instance != null)
+        {
+            ResultPanel.Instance.ShowLoss();
+        }
 
 
+
+        // =========================
+        // GAME OVER
+        // =========================
 
         if (GameManager.Instance != null)
+        {
             GameManager.Instance.CheckGameOver();
+        }
+
+
+
+        gameObject.SetActive(false);
     }
 
 

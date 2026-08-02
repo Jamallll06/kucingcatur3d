@@ -401,4 +401,13 @@ public class GridManager : MonoBehaviour
         ];
     }
 
+    public Vector3 GetWorldPosition(Vector2Int position)
+    {
+        return new Vector3(
+            position.x * tileSize,
+            0,
+            position.y * tileSize
+        );
+    }
+
 }

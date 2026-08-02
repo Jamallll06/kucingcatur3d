@@ -75,24 +75,80 @@ public class LevelManager : MonoBehaviour
     public void StartLevel(int index)
     {
         if (levels == null || levels.Length == 0)
+        {
+            Debug.LogError("Level Database kosong");
             return;
+        }
+
 
         if (index < 0 || index >= levels.Length)
+        {
+            Debug.LogError(
+                "Index level tidak valid : " + index
+            );
+
             return;
+        }
+
 
         currentLevelIndex = index;
 
+
         SaveProgress();
 
+
         SceneManager.LoadScene(
-            levels[index].levelNumber);
+            levels[index].levelNumber
+        );
+    }
+
+
+
+    public void LoadNextLevel()
+    {
+        if (levels == null || levels.Length == 0)
+        {
+            Debug.LogError(
+                "Level Database kosong"
+            );
+
+            return;
+        }
+
+
+
+        if (currentLevelIndex >= levels.Length)
+        {
+            Debug.Log(
+                "Semua level selesai"
+            );
+
+            GameComplete();
+
+            return;
+        }
+
+
+
+        Debug.Log(
+            "Loading Level : "
+            + (currentLevelIndex + 1)
+        );
+
+
+
+        SceneManager.LoadScene(
+            levels[currentLevelIndex].levelNumber
+        );
     }
 
     public void LevelComplete()
     {
         UnlockNextLevel();
 
+
         currentLevelIndex++;
+
 
         if (currentLevelIndex >= levels.Length)
         {
@@ -100,7 +156,14 @@ public class LevelManager : MonoBehaviour
             return;
         }
 
+
         SaveProgress();
+
+
+        Debug.Log(
+            "Next Level Index : "
+            + currentLevelIndex
+        );
     }
 
     private void UnlockNextLevel()

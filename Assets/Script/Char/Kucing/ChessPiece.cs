@@ -144,10 +144,7 @@ public abstract class ChessPiece : MonoBehaviour
 
         if (targetTile.IsBlocked)
         {
-            Debug.Log(
-                "Gerakan diblok oleh Barrier"
-            );
-
+            Debug.Log("Tidak bisa berhenti di atas Barrier.");
             return false;
         }
 
@@ -402,26 +399,23 @@ public abstract class ChessPiece : MonoBehaviour
 
 
 
-    protected bool IsEmptyTile(Vector2Int position)
+    protected bool IsEmptyTile(
+    Vector2Int position,
+    bool ignoreBarrier = false)
     {
-
         Tile tile =
             GridManager.Instance.GetTile(position);
-
-
 
         if (tile == null)
             return false;
 
-
-
-        if (tile.IsBlocked)
+        if (tile.IsOccupied)
             return false;
 
+        if (!ignoreBarrier && tile.IsBlocked)
+            return false;
 
-
-        return !tile.IsOccupied;
-
+        return true;
     }
 
 
@@ -527,5 +521,7 @@ public abstract class ChessPiece : MonoBehaviour
         );
 
     }
+
+  
 
 }

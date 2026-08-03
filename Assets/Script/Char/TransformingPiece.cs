@@ -354,7 +354,13 @@ public class TransformingPiece : ChessPiece
                 Vector2Int position = new Vector2Int(x, y);
                 Tile tile = GridManager.Instance.GetTile(position);
 
-                if (tile == null || tile.IsOccupied)
+                if (tile == null)
+                    continue;
+
+                if (tile.IsOccupied)
+                    continue;
+
+                if (tile.IsBlocked)
                     continue;
 
                 float distance = Vector2Int.Distance(
@@ -392,8 +398,8 @@ public class TransformingPiece : ChessPiece
     }
 
     private void AddSlidingMoves(
-        List<Vector2Int> moves,
-        Vector2Int[] directions)
+    List<Vector2Int> moves,
+    Vector2Int[] directions)
     {
         foreach (Vector2Int direction in directions)
         {
@@ -403,10 +409,18 @@ public class TransformingPiece : ChessPiece
             {
                 Tile tile = GridManager.Instance.GetTile(target);
 
-                if (tile == null || tile.IsOccupied)
+                if (tile == null)
+                    break;
+
+                if (tile.IsOccupied)
+                    break;
+
+                // Barrier menghentikan semua sliding piece
+                if (tile.IsBlocked)
                     break;
 
                 moves.Add(target);
+
                 target += direction;
             }
         }
@@ -430,7 +444,7 @@ public class TransformingPiece : ChessPiece
         {
             Vector2Int target = CurrentPosition + move;
 
-            if (IsEmptyTile(target))
+            if (IsEmptyTile(target, true))
                 moves.Add(target);
         }
     }
